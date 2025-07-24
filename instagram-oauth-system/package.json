@@ -1,0 +1,34 @@
+{
+  "name": "instagram-oauth-webhook-system",
+  "version": "1.0.0",
+  "description": "Sistema automatizado OAuth Instagram + Webhook MultiOne",
+  "main": "oauth-server.js",
+  "scripts": {
+    "start": "node oauth-server.js",
+    "dev": "nodemon oauth-server.js",
+    "test": "node test-system.js"
+  },
+  "keywords": [
+    "instagram",
+    "oauth",
+    "webhook",
+    "facebook",
+    "meta",
+    "multione",
+    "automation"
+  ],
+  "author": "MultiOne Instagram Integration",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
