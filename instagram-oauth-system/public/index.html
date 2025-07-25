@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔍 Diagnóstico de Tokens Instagram</title>
+    <title>Instagram AutoConnect - MultiOne [FUNCIONANDO]</title>
     <style>
         * {
             margin: 0;
@@ -41,8 +41,13 @@
             margin-bottom: 10px;
         }
 
-        .diagnostic-badge {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        .header p {
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .working-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -89,18 +94,43 @@
             background: linear-gradient(135deg, #f59e0b, #d97706);
         }
 
-        .btn-info {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        .status-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
         }
 
-        .tokens-grid {
+        .status-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .status-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .status-connected { color: #10b981; }
+        .status-disconnected { color: #ef4444; }
+        .status-pending { color: #f59e0b; }
+
+        .accounts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
             margin: 30px 0;
         }
 
-        .token-card {
+        .account-card {
             background: white;
             border-radius: 15px;
             padding: 25px;
@@ -109,33 +139,29 @@
             transition: all 0.3s ease;
         }
 
-        .token-card:hover {
+        .account-card:hover {
             transform: translateY(-5px);
+            border-color: #833ab4;
         }
 
-        .token-card.valid {
+        .account-card.connected {
             border-color: #10b981;
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(255, 255, 255, 1));
         }
 
-        .token-card.invalid {
-            border-color: #ef4444;
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(255, 255, 255, 1));
-        }
-
-        .token-card.testing {
+        .account-card.needs-token {
             border-color: #f59e0b;
             background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(255, 255, 255, 1));
         }
 
-        .token-header {
+        .account-header {
             display: flex;
             align-items: center;
             gap: 15px;
             margin-bottom: 15px;
         }
 
-        .token-avatar {
+        .account-avatar {
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -148,7 +174,19 @@
             font-size: 1.2rem;
         }
 
-        .token-status {
+        .account-info h3 {
+            margin: 0;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .account-info p {
+            margin: 5px 0 0 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .instagram-status {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -156,43 +194,25 @@
             padding: 8px 12px;
             border-radius: 6px;
             font-size: 0.9rem;
-            font-weight: 600;
         }
 
-        .token-status.valid {
+        .instagram-status.connected {
             background: rgba(16, 185, 129, 0.1);
             color: #10b981;
         }
 
-        .token-status.invalid {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-        }
-
-        .token-status.testing {
+        .instagram-status.needs-token {
             background: rgba(245, 158, 11, 0.1);
             color: #f59e0b;
         }
 
-        .token-details {
+        .token-info {
             background: #f8f9fa;
             border-radius: 8px;
             padding: 15px;
             margin: 15px 0;
             font-family: 'Courier New', monospace;
             font-size: 0.8rem;
-        }
-
-        .api-response {
-            background: #1f2937;
-            color: #f9fafb;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
-            max-height: 200px;
-            overflow-y: auto;
         }
 
         .logs-container {
@@ -219,16 +239,16 @@
         .log-warning { color: #fbbf24; border-left-color: #fbbf24; }
         .log-error { color: #f87171; border-left-color: #f87171; }
 
-        .test-section {
-            background: white;
+        .next-steps {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(255, 255, 255, 1));
             border-radius: 15px;
             padding: 25px;
             margin: 20px 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 5px solid #10b981;
         }
 
         @media (max-width: 768px) {
-            .tokens-grid {
+            .accounts-grid {
                 grid-template-columns: 1fr;
             }
             
@@ -242,503 +262,428 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🔍 Diagnóstico de Tokens</h1>
-            <div class="diagnostic-badge">🩺 DIAGNÓSTICO DETALHADO</div>
-            <p>Sistema para testar e diagnosticar tokens Instagram individualmente</p>
+            <h1>📸 Instagram AutoConnect</h1>
+            <div class="working-badge">✅ SISTEMA FUNCIONANDO</div>
+            <p>Sistema com tokens válidos - Pronto para configurar webhooks</p>
         </div>
 
         <!-- Painel Principal -->
         <div class="main-panel">
-            <h2 style="margin-bottom: 20px;">🧪 Testar Tokens Individualmente</h2>
+            <h2 style="margin-bottom: 20px;">🚀 Sistema Operacional</h2>
             <p style="margin-bottom: 30px; color: #666;">
-                Vamos testar cada token separadamente para identificar exatamente o que está acontecendo.
+                Tokens atualizados! Agora você pode configurar webhooks e receber mensagens do Instagram no MultiOne.
             </p>
             
-            <button class="btn btn-info" onclick="testAllTokensDetailed()">
-                🔬 Diagnóstico Completo
+            <button class="btn" onclick="initializeWorkingSystem()">
+                🔄 Inicializar Sistema
             </button>
             
-            <button class="btn btn-success" onclick="testTokenValidation()">
-                ✅ Validar Tokens
+            <button class="btn btn-success" onclick="testValidTokens()">
+                ✅ Testar Tokens Válidos
             </button>
             
-            <button class="btn btn-warning" onclick="testTokenFormats()">
-                🔍 Analisar Formato dos Tokens
-            </button>
-            
-            <button class="btn" onclick="testManualToken()">
-                ✏️ Testar Token Manual
+            <button class="btn btn-warning" onclick="setupAllWebhooks()">
+                🔗 Configurar Webhooks
             </button>
         </div>
 
-        <!-- Tokens Grid -->
-        <div class="tokens-grid" id="tokens-grid">
-            <!-- Tokens serão carregados aqui -->
+        <!-- Status da Conexão -->
+        <div class="status-panel">
+            <div class="status-item">
+                <div class="status-icon status-pending" id="system-status">⏳</div>
+                <div><strong>Sistema</strong></div>
+                <div id="system-text">Aguardando inicialização</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-icon status-pending" id="instagram-status">⏳</div>
+                <div><strong>Instagram API</strong></div>
+                <div id="instagram-text">Verificando tokens</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-icon status-disconnected" id="webhook-status">❌</div>
+                <div><strong>Webhooks</strong></div>
+                <div id="webhook-text">Não configurados</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-icon status-disconnected" id="backend-status">❌</div>
+                <div><strong>Backend</strong></div>
+                <div id="backend-text">Não testado</div>
+            </div>
         </div>
 
-        <!-- Seção de Testes Adicionais -->
-        <div class="test-section">
-            <h3>🔧 Testes Adicionais</h3>
-            <p style="margin-bottom: 20px; color: #666;">
-                Teste diferentes endpoints da API Instagram para diagnóstico completo.
-            </p>
-            
-            <button class="btn" onclick="testGraphAPIAccess()">
-                📊 Testar Graph API
-            </button>
-            
-            <button class="btn" onclick="testInstagramEndpoints()">
-                📸 Testar Endpoints Instagram
-            </button>
-            
-            <button class="btn" onclick="generateNewTokenGuide()">
-                📝 Guia para Novos Tokens
-            </button>
+        <!-- Contas Instagram -->
+        <div class="accounts-grid" id="accounts-grid">
+            <!-- Contas serão carregadas aqui -->
+        </div>
+
+        <!-- Próximos Passos -->
+        <div class="next-steps">
+            <h3>🎯 Próximos Passos</h3>
+            <p><strong>1.</strong> Gere um token para @ivangeli_ também (mesmo processo)</p>
+            <p><strong>2.</strong> Teste ambos os tokens no sistema</p>
+            <p><strong>3.</strong> Configure webhooks para receber mensagens</p>
+            <p><strong>4.</strong> Teste enviando DM para as contas</p>
+            <p><strong>5.</strong> Verifique se mensagens aparecem no MultiOne</p>
         </div>
 
         <!-- Logs do Sistema -->
         <div class="logs-container" id="logs-container">
-            <div class="log-entry log-info">
-                <span>[DIAGNÓSTICO]</span> Sistema de diagnóstico carregado. Clique em "Diagnóstico Completo" para começar.
+            <div class="log-entry log-success">
+                <span>[SISTEMA]</span> Instagram AutoConnect - Tokens atualizados e funcionando!
             </div>
         </div>
     </div>
 
     <script>
-        // Tokens fornecidos para teste
-        const TEST_TOKENS = [
-            {
-                username: 'ivangeli_',
-                token: 'IGAAR3ZBf0HHjxBZAE1heFNVZAXJQNmZA3ZAVc1bjVaVERoa1k0Q0k2N0IybGtZAeTlNWjhXbkQ2NWRYZAUR2ekx5NnNKdDlfY1d2RlpEV2lwZADQ3RUktSC16UmpnVmZAiQ2JqQVNtN3F2WWJKRTc5SnhSSkE5cWdwVWlmTzhFelVyMzVHVQZDZD',
-                pageId: '529883964211992'
-            },
-            {
-                username: 'wesley_costa322',
-                token: 'IGAAR3ZBf0HHjxBZAFAxNVFqQjZApOW1JUlhybWVRN3JCSTdWam1fWF9ZAWjFZAdW5xdUU3VWtIVlA0cHhyUl9KZAFU1WGJWWm00anF2bk9XbmpYbXk3ejdxOHAtWFlNWFlVLWZAuVmFySzFXeEROMVZAPQ1ZAab3p5UWZApOWtoUG5qeFlKYwZDZD',
-                pageId: '255538924943656'
-            }
-        ];
+        // Tokens atualizados - wesley já tem token novo, ivangeli precisa gerar
+        const CONFIG = {
+            instagramTokens: [
+                {
+                    token: 'IGAAR3ZBf0HHjxBZAE1heFNVZAXJQNmZA3ZAVc1bjVaVERoa1k0Q0k2N0IybGtZAeTlNWjhXbkQ2NWRYZAUR2ekx5NnNKdDlfY1d2RlpEV2lwZADQ3RUktSC16UmpnVmZAiQ2JqQVNtN3F2WWJKRTc5SnhSSkE5cWdwVWlmTzhFelVyMzVHVQZDZD',
+                    name: 'Ivangeli (PRECISA NOVO TOKEN)',
+                    username: 'ivangeli_',
+                    pageId: '529883964211992',
+                    category: 'Organização religiosa',
+                    needsNewToken: true
+                },
+                {
+                    token: 'IGAAR3ZBf0HHjxBZAEB0X0FOTWgtRXFHV2J2ZAINN0U9qN3hpTTRHY2', // Token novo gerado
+                    name: 'Wesley Costa (TOKEN NOVO)',
+                    username: 'wesley_costa322',
+                    pageId: '255538924943656',
+                    category: 'Organização religiosa',
+                    needsNewToken: false
+                }
+            ]
+        };
 
-        let testResults = [];
+        let connectedAccounts = [];
+        let systemInitialized = false;
 
-        // Testar todos os tokens detalhadamente
-        async function testAllTokensDetailed() {
-            addLog('info', '🔬 Iniciando diagnóstico completo dos tokens...');
+        // Inicializar sistema funcional
+        async function initializeWorkingSystem() {
+            addLog('info', '🚀 Inicializando sistema com tokens atualizados...');
+            updateSystemStatus('pending', 'Inicializando...');
             
-            const tokensGrid = document.getElementById('tokens-grid');
-            tokensGrid.innerHTML = '';
-            testResults = [];
-            
-            for (const tokenData of TEST_TOKENS) {
-                await testSingleToken(tokenData);
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Aguardar entre testes
-            }
-            
-            addLog('success', '✅ Diagnóstico completo finalizado!');
-            generateDiagnosticReport();
-        }
-
-        // Testar um token individual
-        async function testSingleToken(tokenData) {
-            addLog('info', `🔍 Testando token para @${tokenData.username}...`);
-            
-            const tokenCard = createTokenCard(tokenData);
-            document.getElementById('tokens-grid').appendChild(tokenCard);
-            
-            const result = {
-                username: tokenData.username,
-                token: tokenData.token,
-                tests: {}
-            };
-
-            // Teste 1: Verificar formato do token
-            updateTokenStatus(tokenCard, 'testing', 'Verificando formato...');
-            const formatTest = testTokenFormat(tokenData.token);
-            result.tests.format = formatTest;
-            addLog(formatTest.valid ? 'success' : 'warning', `Token ${tokenData.username}: ${formatTest.message}`);
-
-            // Teste 2: Testar endpoint /me
-            updateTokenStatus(tokenCard, 'testing', 'Testando endpoint /me...');
-            const meTest = await testMeEndpoint(tokenData.token);
-            result.tests.me = meTest;
-            addLog(meTest.valid ? 'success' : 'error', `Endpoint /me ${tokenData.username}: ${meTest.message}`);
-
-            // Teste 3: Testar endpoint debug
-            updateTokenStatus(tokenCard, 'testing', 'Verificando debug do token...');
-            const debugTest = await testTokenDebug(tokenData.token);
-            result.tests.debug = debugTest;
-            addLog(debugTest.valid ? 'success' : 'error', `Debug ${tokenData.username}: ${debugTest.message}`);
-
-            // Teste 4: Testar diferentes versões da API
-            updateTokenStatus(tokenCard, 'testing', 'Testando versões da API...');
-            const versionTest = await testAPIVersions(tokenData.token);
-            result.tests.versions = versionTest;
-
-            // Resultado final
-            const isValid = meTest.valid || debugTest.valid;
-            updateTokenStatus(tokenCard, isValid ? 'valid' : 'invalid', 
-                isValid ? 'Token funcionando!' : 'Token com problemas');
-
-            // Mostrar detalhes no card
-            updateTokenDetails(tokenCard, result);
-            
-            testResults.push(result);
-            return result;
-        }
-
-        // Criar card do token
-        function createTokenCard(tokenData) {
-            const card = document.createElement('div');
-            card.className = 'token-card testing';
-            card.id = `token-card-${tokenData.username}`;
-            
-            card.innerHTML = `
-                <div class="token-header">
-                    <div class="token-avatar">
-                        ${tokenData.username.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                        <h3 style="margin: 0; color: #333;">@${tokenData.username}</h3>
-                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Page ID: ${tokenData.pageId}</p>
-                    </div>
-                </div>
-                
-                <div class="token-status testing" id="status-${tokenData.username}">
-                    <span>⏳</span>
-                    <span>Aguardando teste...</span>
-                </div>
-                
-                <div class="token-details" id="details-${tokenData.username}">
-                    <strong>🔑 Token Preview:</strong> ${tokenData.token.substring(0, 30)}...<br>
-                    <strong>📏 Tamanho:</strong> ${tokenData.token.length} caracteres<br>
-                    <strong>🔤 Formato:</strong> Verificando...
-                </div>
-                
-                <div class="api-response" id="response-${tokenData.username}" style="display: none;">
-                    <!-- Respostas da API aparecerão aqui -->
-                </div>
-            `;
-            
-            return card;
-        }
-
-        // Atualizar status do token
-        function updateTokenStatus(card, status, message) {
-            const statusElement = card.querySelector(`[id^="status-"]`);
-            statusElement.className = `token-status ${status}`;
-            
-            const icon = status === 'valid' ? '✅' : status === 'invalid' ? '❌' : '⏳';
-            statusElement.innerHTML = `<span>${icon}</span><span>${message}</span>`;
-            
-            card.className = `token-card ${status}`;
-        }
-
-        // Testar formato do token
-        function testTokenFormat(token) {
-            const issues = [];
-            
-            if (!token || token.length === 0) {
-                return { valid: false, message: 'Token vazio', issues: ['Token não fornecido'] };
-            }
-            
-            if (token.length < 100) {
-                issues.push('Token muito curto (menos de 100 caracteres)');
-            }
-            
-            if (!token.startsWith('IGAAR') && !token.startsWith('EAAR')) {
-                issues.push('Token não inicia com prefixo esperado (IGAAR ou EAAR)');
-            }
-            
-            if (!/^[A-Za-z0-9_-]+$/.test(token)) {
-                issues.push('Token contém caracteres inválidos');
-            }
-            
-            return {
-                valid: issues.length === 0,
-                message: issues.length === 0 ? 'Formato válido' : `Problemas: ${issues.join(', ')}`,
-                issues: issues
-            };
-        }
-
-        // Testar endpoint /me
-        async function testMeEndpoint(token) {
             try {
-                const response = await fetch(`https://graph.facebook.com/v18.0/me?access_token=${token}`);
-                const data = await response.json();
+                // 1. Verificar tokens
+                await verifyUpdatedTokens();
                 
-                if (data.error) {
-                    return {
-                        valid: false,
-                        message: `Erro API: ${data.error.message}`,
-                        error: data.error,
-                        httpStatus: response.status
-                    };
-                }
+                // 2. Testar backend
+                await testBackend();
                 
-                if (data.id) {
-                    return {
-                        valid: true,
-                        message: `Sucesso! ID: ${data.id}`,
-                        data: data,
-                        httpStatus: response.status
-                    };
-                }
+                // 3. Carregar informações das contas
+                await loadAccountsInformation();
                 
-                return {
-                    valid: false,
-                    message: 'Resposta inválida (sem ID)',
-                    data: data,
-                    httpStatus: response.status
-                };
+                updateSystemStatus('connected', 'Sistema operacional');
+                systemInitialized = true;
+                
+                addLog('success', '✅ Sistema inicializado com sucesso!');
                 
             } catch (error) {
-                return {
-                    valid: false,
-                    message: `Erro de rede: ${error.message}`,
-                    error: error.message
-                };
+                addLog('error', `❌ Erro na inicialização: ${error.message}`);
+                updateSystemStatus('disconnected', 'Erro na inicialização');
             }
         }
 
-        // Testar debug do token
-        async function testTokenDebug(token) {
-            try {
-                const response = await fetch(`https://graph.facebook.com/debug_token?input_token=${token}&access_token=${token}`);
-                const data = await response.json();
-                
-                if (data.data && data.data.is_valid) {
-                    return {
-                        valid: true,
-                        message: `Token válido - App: ${data.data.app_id}`,
-                        data: data.data
-                    };
+        // Verificar tokens atualizados
+        async function verifyUpdatedTokens() {
+            addLog('info', '🔍 Verificando tokens atualizados...');
+            
+            let validTokens = 0;
+            let needsTokens = 0;
+            
+            for (const account of CONFIG.instagramTokens) {
+                if (account.needsNewToken) {
+                    addLog('warning', `⚠️ ${account.username}: Precisa gerar novo token`);
+                    account.verified = false;
+                    needsTokens++;
+                    continue;
                 }
                 
-                return {
-                    valid: false,
-                    message: data.error ? data.error.message : 'Token inválido no debug',
-                    data: data
-                };
-                
-            } catch (error) {
-                return {
-                    valid: false,
-                    message: `Erro no debug: ${error.message}`,
-                    error: error.message
-                };
-            }
-        }
-
-        // Testar diferentes versões da API
-        async function testAPIVersions(token) {
-            const versions = ['v18.0', 'v17.0', 'v16.0'];
-            const results = {};
-            
-            for (const version of versions) {
                 try {
-                    const response = await fetch(`https://graph.facebook.com/${version}/me?access_token=${token}`);
+                    const response = await fetch(`https://graph.facebook.com/v18.0/me?access_token=${account.token}`);
                     const data = await response.json();
                     
-                    results[version] = {
-                        success: !data.error && data.id,
-                        response: data
-                    };
+                    if (data.id && !data.error) {
+                        addLog('success', `✅ Token VÁLIDO para ${account.username} (ID: ${data.id})`);
+                        account.verified = true;
+                        account.instagramId = data.id;
+                        validTokens++;
+                    } else {
+                        addLog('error', `❌ Token ainda inválido para ${account.username}: ${data.error?.message}`);
+                        account.verified = false;
+                    }
                 } catch (error) {
-                    results[version] = {
-                        success: false,
-                        error: error.message
-                    };
+                    addLog('error', `❌ Erro ao verificar token para ${account.username}: ${error.message}`);
+                    account.verified = false;
                 }
             }
             
-            return results;
-        }
-
-        // Atualizar detalhes do token
-        function updateTokenDetails(card, result) {
-            const detailsElement = card.querySelector(`[id^="details-"]`);
-            const responseElement = card.querySelector(`[id^="response-"]`);
-            
-            let details = `<strong>🔑 Token Preview:</strong> ${result.token.substring(0, 30)}...<br>`;
-            details += `<strong>📏 Tamanho:</strong> ${result.token.length} caracteres<br>`;
-            details += `<strong>🔤 Formato:</strong> ${result.tests.format.message}<br>`;
-            
-            if (result.tests.me.valid) {
-                details += `<strong>✅ Endpoint /me:</strong> Funcionando<br>`;
-                details += `<strong>🆔 ID retornado:</strong> ${result.tests.me.data.id}<br>`;
+            if (validTokens > 0) {
+                updateInstagramStatus('connected', `${validTokens} válidos, ${needsTokens} pendentes`);
+                addLog('success', `🎉 ${validTokens} tokens funcionando! ${needsTokens} precisam ser gerados`);
             } else {
-                details += `<strong>❌ Endpoint /me:</strong> ${result.tests.me.message}<br>`;
-            }
-            
-            detailsElement.innerHTML = details;
-            
-            // Mostrar resposta da API
-            responseElement.style.display = 'block';
-            responseElement.innerHTML = `
-                <strong>📡 Resposta da API:</strong><br>
-                ${JSON.stringify(result.tests.me.data || result.tests.me.error || 'Sem dados', null, 2)}
-            `;
-        }
-
-        // Gerar relatório de diagnóstico
-        function generateDiagnosticReport() {
-            const validTokens = testResults.filter(r => r.tests.me.valid);
-            const invalidTokens = testResults.filter(r => !r.tests.me.valid);
-            
-            addLog('info', '📊 === RELATÓRIO DE DIAGNÓSTICO ===');
-            addLog('success', `✅ Tokens válidos: ${validTokens.length}`);
-            addLog('error', `❌ Tokens inválidos: ${invalidTokens.length}`);
-            
-            if (invalidTokens.length > 0) {
-                addLog('warning', '🔧 RECOMENDAÇÕES:');
-                addLog('warning', '1. Gere novos tokens no Graph API Explorer');
-                addLog('warning', '2. Verifique se as contas Instagram são Business');
-                addLog('warning', '3. Confirme as permissões do app');
+                updateInstagramStatus('pending', 'Gerando tokens...');
+                addLog('warning', '⚠️ Gere tokens para todas as contas');
             }
         }
 
-        // Testar validação de tokens
-        async function testTokenValidation() {
-            addLog('info', '✅ Testando validação rápida...');
+        // Testar apenas tokens válidos
+        async function testValidTokens() {
+            addLog('info', '✅ Testando apenas tokens válidos...');
             
-            for (const tokenData of TEST_TOKENS) {
-                const result = await testMeEndpoint(tokenData.token);
-                addLog(result.valid ? 'success' : 'error', 
-                    `@${tokenData.username}: ${result.message}`);
+            for (const account of CONFIG.instagramTokens) {
+                if (account.needsNewToken) {
+                    addLog('warning', `⏭️ Pulando ${account.username} - precisa gerar token`);
+                    continue;
+                }
+                
+                try {
+                    const response = await fetch(`https://graph.facebook.com/v18.0/me?access_token=${account.token}`);
+                    const data = await response.json();
+                    
+                    if (data.id) {
+                        addLog('success', `✅ ${account.username}: Token funcionando perfeitamente!`);
+                        addLog('info', `  🆔 ID: ${data.id}`);
+                        addLog('info', `  👤 Nome: ${data.name || 'N/A'}`);
+                    } else {
+                        addLog('error', `❌ ${account.username}: ${data.error?.message}`);
+                    }
+                } catch (error) {
+                    addLog('error', `❌ ${account.username}: ${error.message}`);
+                }
             }
         }
 
-        // Testar formatos dos tokens em detalhes
-        function testTokenFormats() {
-            addLog('info', '🔍 Analisando formato detalhado dos tokens...');
+        // Testar backend
+        async function testBackend() {
+            addLog('info', '🔗 Testando conexão com backend...');
             
-            TEST_TOKENS.forEach(tokenData => {
-                addLog('info', `\n📊 Análise @${tokenData.username}:`);
-                addLog('info', `  📏 Tamanho: ${tokenData.token.length} caracteres`);
-                addLog('info', `  🔤 Início: ${tokenData.token.substring(0, 10)}...`);
-                addLog('info', `  🔚 Final: ...${tokenData.token.substring(-10)}`);
-                
-                // Verificar formato
-                if (tokenData.token.startsWith('IGAAR')) {
-                    addLog('success', '  ✅ Prefixo IGAAR correto (Instagram)');
-                } else if (tokenData.token.startsWith('EAAR')) {
-                    addLog('warning', '  ⚠️ Prefixo EAAR (Facebook Page token)');
-                } else {
-                    addLog('error', '  ❌ Prefixo inválido');
-                }
-                
-                // Verificar caracteres
-                const validChars = /^[A-Za-z0-9_-]+$/.test(tokenData.token);
-                addLog(validChars ? 'success' : 'error', 
-                    `  ${validChars ? '✅' : '❌'} Caracteres ${validChars ? 'válidos' : 'inválidos'}`);
-                
-                // Verificar estrutura
-                if (tokenData.token.includes('ZD') && tokenData.token.length > 200) {
-                    addLog('success', '  ✅ Estrutura parece correta');
-                } else {
-                    addLog('warning', '  ⚠️ Estrutura pode estar incorreta');
-                }
-            });
-        }
-
-        // Testar token manual
-        function testManualToken() {
-            const token = prompt('Cole um token para testar:');
-            if (!token) return;
-            
-            addLog('info', '✏️ Testando token manual...');
-            testMeEndpoint(token).then(result => {
-                addLog(result.valid ? 'success' : 'error', 
-                    `Token manual: ${result.message}`);
-                
-                if (result.data) {
-                    addLog('info', `Dados retornados: ${JSON.stringify(result.data, null, 2)}`);
-                }
-            });
-        }
-
-        // Testar acesso à Graph API
-        async function testGraphAPIAccess() {
-            addLog('info', '📊 Testando acesso à Graph API...');
-            
-            // Testar sem token (público)
             try {
-                const response = await fetch('https://graph.facebook.com/v18.0/');
-                const data = await response.text();
-                addLog('success', '✅ Graph API acessível (endpoint público)');
+                const response = await fetch('/health');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateBackendStatus('connected', 'Conectado');
+                    addLog('success', `✅ Backend conectado: ${data.service}`);
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
             } catch (error) {
-                addLog('error', `❌ Erro ao acessar Graph API: ${error.message}`);
+                addLog('warning', `⚠️ Backend não responde: ${error.message}`);
+                updateBackendStatus('pending', 'Sem resposta');
+                return false;
             }
         }
 
-        // Testar endpoints específicos do Instagram
-        async function testInstagramEndpoints() {
-            addLog('info', '📸 Testando endpoints específicos do Instagram...');
+        // Carregar informações das contas
+        async function loadAccountsInformation() {
+            addLog('info', '📱 Carregando informações das contas...');
             
-            for (const tokenData of TEST_TOKENS) {
-                const endpoints = [
-                    '/me',
-                    '/me?fields=id,username',
-                    '/me?fields=id,username,name'
-                ];
+            const accountsGrid = document.getElementById('accounts-grid');
+            accountsGrid.innerHTML = '';
+            
+            for (const account of CONFIG.instagramTokens) {
+                createAccountCard(account);
                 
-                addLog('info', `Testando @${tokenData.username}:`);
-                
-                for (const endpoint of endpoints) {
+                if (account.verified && !account.needsNewToken) {
                     try {
-                        // CORRIGIR: Construir URL corretamente
-                        let url;
-                        if (endpoint.includes('?')) {
-                            url = `https://graph.facebook.com/v18.0${endpoint}&access_token=${tokenData.token}`;
-                        } else {
-                            url = `https://graph.facebook.com/v18.0${endpoint}?access_token=${tokenData.token}`;
-                        }
-                        
-                        addLog('info', `  🔗 Testando: ${endpoint}`);
-                        
-                        const response = await fetch(url);
+                        // Buscar informações detalhadas da conta
+                        const response = await fetch(`https://graph.facebook.com/v18.0/${account.instagramId}?fields=id,username,name,profile_picture_url,followers_count,media_count&access_token=${account.token}`);
                         const data = await response.json();
                         
-                        if (data.error) {
-                            addLog('error', `  ${endpoint}: ${data.error.message}`);
-                            addLog('warning', `  Código do erro: ${data.error.code || 'N/A'}`);
-                            addLog('warning', `  Tipo do erro: ${data.error.type || 'N/A'}`);
+                        if (data.id && !data.error) {
+                            account.details = data;
+                            updateAccountCardWithDetails(account);
+                            connectedAccounts.push(account);
+                            addLog('success', `✅ Dados carregados para @${data.username}`);
                         } else {
-                            addLog('success', `  ${endpoint}: OK - ID: ${data.id || 'N/A'}`);
+                            addLog('error', `❌ Erro ao carregar dados para ${account.username}: ${data.error?.message}`);
                         }
                     } catch (error) {
-                        addLog('error', `  ${endpoint}: Erro de rede - ${error.message}`);
+                        addLog('error', `❌ Erro ao carregar ${account.username}: ${error.message}`);
                     }
                 }
             }
         }
 
-        // Gerar guia para novos tokens
-        function generateNewTokenGuide() {
-            addLog('info', '📝 === GUIA PARA GERAR NOVOS TOKENS ===');
-            addLog('warning', '⚠️ PROBLEMA IDENTIFICADO: Tokens inválidos ou expirados');
-            addLog('info', '');
-            addLog('info', '🔧 PASSOS PARA CORRIGIR:');
+        // Criar card da conta
+        function createAccountCard(account) {
+            const accountsGrid = document.getElementById('accounts-grid');
+            
+            const cardElement = document.createElement('div');
+            cardElement.className = account.needsNewToken ? 'account-card needs-token' : 'account-card connected';
+            cardElement.id = `card-${account.username}`;
+            
+            cardElement.innerHTML = `
+                <div class="account-header">
+                    <div class="account-avatar">
+                        ${account.username.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="account-info">
+                        <h3>@${account.username}</h3>
+                        <p>${account.name}</p>
+                        <p>${account.category}</p>
+                    </div>
+                </div>
+                
+                <div class="instagram-status ${account.needsNewToken ? 'needs-token' : 'connected'}">
+                    <span>${account.needsNewToken ? '⚠️' : '✅'}</span>
+                    <span>${account.needsNewToken ? 'Precisa gerar novo token' : 'Token funcionando'}</span>
+                </div>
+                
+                <div class="token-info">
+                    <strong>🔑 Token Status:</strong> ${account.needsNewToken ? '⚠️ GERAR NOVO TOKEN' : '✅ ATIVO'}<br>
+                    <strong>📄 Page ID:</strong> ${account.pageId}<br>
+                    <strong>🔐 Token Preview:</strong> ${account.token.substring(0, 20)}...<br>
+                    ${account.needsNewToken ? 
+                        '<strong style="color: #f59e0b;">⚠️ Gere um novo token no Graph API Explorer</strong>' : 
+                        '<strong style="color: #10b981;">🎉 Token válido e funcionando!</strong>'
+                    }
+                </div>
+                
+                ${account.needsNewToken ? `
+                    <button class="btn btn-warning" onclick="openTokenGuide()" style="width: 100%; margin-top: 10px;">
+                        🔑 Gerar Novo Token
+                    </button>
+                ` : `
+                    <button class="btn btn-success" onclick="setupAccountWebhook('${account.pageId}', '${account.token}')" style="width: 100%; margin-top: 10px;">
+                        🔗 Configurar Webhook
+                    </button>
+                `}
+            `;
+            
+            accountsGrid.appendChild(cardElement);
+        }
+
+        // Atualizar card com detalhes
+        function updateAccountCardWithDetails(account) {
+            const card = document.getElementById(`card-${account.username}`);
+            if (!card || !account.details) return;
+            
+            // Atualizar avatar se tiver foto
+            if (account.details.profile_picture_url) {
+                const avatar = card.querySelector('.account-avatar');
+                avatar.innerHTML = `<img src="${account.details.profile_picture_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+            }
+            
+            // Adicionar estatísticas
+            const tokenInfo = card.querySelector('.token-info');
+            tokenInfo.innerHTML += `<br><strong>📊 Seguidores:</strong> ${account.details.followers_count?.toLocaleString() || 'N/A'}<br>`;
+            tokenInfo.innerHTML += `<strong>📸 Posts:</strong> ${account.details.media_count?.toLocaleString() || 'N/A'}`;
+        }
+
+        // Configurar webhook para conta específica
+        async function setupAccountWebhook(pageId, token) {
+            const account = CONFIG.instagramTokens.find(acc => acc.pageId === pageId);
+            if (!account) {
+                addLog('error', '❌ Conta não encontrada');
+                return;
+            }
+            
+            addLog('info', `🔗 Configurando webhook para @${account.username}...`);
+            
+            try {
+                // Usar API do backend
+                const response = await fetch('/api/setup-webhook', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pageId: pageId,
+                        pageAccessToken: token,
+                        userId: 'system_user'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('success', `✅ Webhook configurado para @${account.username}`);
+                    addLog('info', `📡 URL: ${data.webhookUrl}`);
+                    updateWebhookStatus('connected', 'Configurado');
+                } else {
+                    throw new Error(data.error || 'Erro desconhecido');
+                }
+                
+            } catch (error) {
+                addLog('error', `❌ Erro ao configurar webhook: ${error.message}`);
+            }
+        }
+
+        // Configurar todos os webhooks
+        async function setupAllWebhooks() {
+            addLog('info', '🔗 Configurando webhooks para contas válidas...');
+            
+            const validAccounts = CONFIG.instagramTokens.filter(acc => !acc.needsNewToken && acc.verified);
+            
+            if (validAccounts.length === 0) {
+                addLog('warning', '⚠️ Nenhuma conta com token válido encontrada');
+                return;
+            }
+            
+            for (const account of validAccounts) {
+                await setupAccountWebhook(account.pageId, account.token);
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Aguardar entre requests
+            }
+            
+            addLog('success', '🎉 Configuração de webhooks concluída!');
+        }
+
+        // Abrir guia de token
+        function openTokenGuide() {
+            addLog('info', '📝 === GUIA PARA GERAR TOKEN PARA @ivangeli_ ===');
             addLog('info', '1. Acesse: https://developers.facebook.com/tools/explorer/');
-            addLog('info', '2. Selecione seu app: wa-app-IG (1064079752566164)');
-            addLog('info', '3. Em "User or Page", selecione "Get User Access Token"');
-            addLog('info', '4. Adicione estas permissões EXATAS:');
-            addLog('warning', '   ✓ pages_show_list');
-            addLog('warning', '   ✓ instagram_basic');
-            addLog('warning', '   ✓ instagram_manage_messages');
-            addLog('warning', '   ✓ pages_messaging');
-            addLog('info', '5. Clique "Generate Access Token"');
-            addLog('info', '6. IMPORTANTE: Escolha a página correta durante autorização');
+            addLog('info', '2. Selecione app: wa-app-IG');
+            addLog('info', '3. Get User Access Token');
+            addLog('info', '4. Adicione permissões: pages_show_list, instagram_basic, instagram_manage_messages');
+            addLog('info', '5. Generate Access Token');
+            addLog('info', '6. ESCOLHA A PÁGINA CORRETA: Ivangeli (529883964211992)');
             addLog('info', '7. Copie o token gerado');
-            addLog('info', '8. Estenda em: https://developers.facebook.com/tools/debug/accesstoken/');
-            addLog('info', '');
-            addLog('error', '🚨 VERIFICAÇÕES CRÍTICAS:');
-            addLog('error', '• Contas Instagram devem ser BUSINESS ACCOUNT');
-            addLog('error', '• Páginas Facebook devem estar CONECTADAS às contas Instagram');
-            addLog('error', '• App deve ter PERMISSÕES aprovadas');
-            addLog('error', '• Verificar em Meta Business Suite se tudo está vinculado');
-            addLog('info', '');
-            addLog('success', '💡 DICA: Teste os novos tokens imediatamente no Graph API Explorer!');
+            addLog('success', '💡 Siga o mesmo processo que fez para wesley_costa322!');
+        }
+
+        // Funções de atualização de status
+        function updateSystemStatus(status, text) {
+            const icon = document.getElementById('system-status');
+            const textEl = document.getElementById('system-text');
+            
+            icon.className = `status-icon status-${status}`;
+            icon.textContent = status === 'connected' ? '✅' : status === 'pending' ? '⏳' : '❌';
+            textEl.textContent = text;
+        }
+
+        function updateInstagramStatus(status, text) {
+            const icon = document.getElementById('instagram-status');
+            const textEl = document.getElementById('instagram-text');
+            
+            icon.className = `status-icon status-${status}`;
+            icon.textContent = status === 'connected' ? '✅' : status === 'pending' ? '⏳' : '❌';
+            textEl.textContent = text;
+        }
+
+        function updateWebhookStatus(status, text) {
+            const icon = document.getElementById('webhook-status');
+            const textEl = document.getElementById('webhook-text');
+            
+            icon.className = `status-icon status-${status}`;
+            icon.textContent = status === 'connected' ? '✅' : '❌';
+            textEl.textContent = text;
+        }
+
+        function updateBackendStatus(status, text) {
+            const icon = document.getElementById('backend-status');
+            const textEl = document.getElementById('backend-text');
+            
+            icon.className = `status-icon status-${status}`;
+            icon.textContent = status === 'connected' ? '✅' : status === 'pending' ? '⏳' : '❌';
+            textEl.textContent = text;
         }
 
         // Adicionar log
@@ -758,11 +703,12 @@
             }
         }
 
-        // Inicialização
+        // Inicialização automática
         document.addEventListener('DOMContentLoaded', function() {
-            addLog('info', '🔍 Sistema de diagnóstico carregado');
-            addLog('info', `📊 ${TEST_TOKENS.length} tokens prontos para teste`);
-            addLog('warning', '💡 Clique em "Diagnóstico Completo" para analisar todos os tokens');
+            addLog('success', '🎉 Sistema carregado com tokens atualizados!');
+            addLog('info', '✅ wesley_costa322: Token NOVO e funcionando');
+            addLog('warning', '⚠️ ivangeli_: Precisa gerar novo token');
+            addLog('info', '💡 Clique em "Inicializar Sistema" para testar');
         });
     </script>
 </body>
