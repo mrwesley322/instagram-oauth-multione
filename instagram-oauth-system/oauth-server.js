@@ -10,11 +10,11 @@ app.use(express.static('public'));
 
 // Configurações
 const CONFIG = {
-    facebookAppId: '1257815482506812',
-    facebookAppSecret: 'fefb66f99adad1d1c98af7',
-    webhookSecret: 'webhook_secret_123',
-    multioneToken: 'c6960cfb9ab93d2109230ae00cf98cc2a87eccbcfe204d178b4e7aacbd1aded0',
-    multioneApiUrl: 'https://sock.multi360.digital/api/messages/send',
+    facebookAppId: process.env.FACEBOOK_APP_ID || '1064079752566164',
+    facebookAppSecret: process.env.FACEBOOK_APP_SECRET || 'fefb66f99adad1d1c98af7',
+    webhookSecret: process.env.WEBHOOK_SECRET || 'webhook_secret_123',
+    multioneToken: process.env.MULTIONE_TOKEN || 'c6960cfb9ab93d2109230ae00cf98cc2a87eccbcfe204d178b4e7aacbd1aded0',
+    multioneApiUrl: process.env.MULTIONE_API_URL || 'https://sock.multi360.digital/api/messages/send',
     baseUrl: process.env.BASE_URL || 'http://localhost:3000'
 };
 
