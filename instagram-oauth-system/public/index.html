@@ -262,8 +262,12 @@
                 ✅ Validar Tokens
             </button>
             
-            <button class="btn btn-warning" onclick="checkTokenPermissions()">
-                🔐 Verificar Permissões
+            <button class="btn btn-warning" onclick="testTokenFormats()">
+                🔍 Analisar Formato dos Tokens
+            </button>
+            
+            <button class="btn" onclick="testManualToken()">
+                ✏️ Testar Token Manual
             </button>
         </div>
 
@@ -604,27 +608,53 @@
             }
         }
 
-        // Verificar permissões dos tokens
-        async function checkTokenPermissions() {
-            addLog('info', '🔐 Verificando permissões dos tokens...');
+        // Testar formatos dos tokens em detalhes
+        function testTokenFormats() {
+            addLog('info', '🔍 Analisando formato detalhado dos tokens...');
             
-            for (const tokenData of TEST_TOKENS) {
-                try {
-                    const response = await fetch(`https://graph.facebook.com/v18.0/me/permissions?access_token=${tokenData.token}`);
-                    const data = await response.json();
-                    
-                    if (data.data) {
-                        addLog('info', `@${tokenData.username} - Permissões:`);
-                        data.data.forEach(perm => {
-                            addLog('info', `  ${perm.permission}: ${perm.status}`);
-                        });
-                    } else {
-                        addLog('error', `@${tokenData.username}: Erro ao obter permissões`);
-                    }
-                } catch (error) {
-                    addLog('error', `@${tokenData.username}: ${error.message}`);
+            TEST_TOKENS.forEach(tokenData => {
+                addLog('info', `\n📊 Análise @${tokenData.username}:`);
+                addLog('info', `  📏 Tamanho: ${tokenData.token.length} caracteres`);
+                addLog('info', `  🔤 Início: ${tokenData.token.substring(0, 10)}...`);
+                addLog('info', `  🔚 Final: ...${tokenData.token.substring(-10)}`);
+                
+                // Verificar formato
+                if (tokenData.token.startsWith('IGAAR')) {
+                    addLog('success', '  ✅ Prefixo IGAAR correto (Instagram)');
+                } else if (tokenData.token.startsWith('EAAR')) {
+                    addLog('warning', '  ⚠️ Prefixo EAAR (Facebook Page token)');
+                } else {
+                    addLog('error', '  ❌ Prefixo inválido');
                 }
-            }
+                
+                // Verificar caracteres
+                const validChars = /^[A-Za-z0-9_-]+$/.test(tokenData.token);
+                addLog(validChars ? 'success' : 'error', 
+                    `  ${validChars ? '✅' : '❌'} Caracteres ${validChars ? 'válidos' : 'inválidos'}`);
+                
+                // Verificar estrutura
+                if (tokenData.token.includes('ZD') && tokenData.token.length > 200) {
+                    addLog('success', '  ✅ Estrutura parece correta');
+                } else {
+                    addLog('warning', '  ⚠️ Estrutura pode estar incorreta');
+                }
+            });
+        }
+
+        // Testar token manual
+        function testManualToken() {
+            const token = prompt('Cole um token para testar:');
+            if (!token) return;
+            
+            addLog('info', '✏️ Testando token manual...');
+            testMeEndpoint(token).then(result => {
+                addLog(result.valid ? 'success' : 'error', 
+                    `Token manual: ${result.message}`);
+                
+                if (result.data) {
+                    addLog('info', `Dados retornados: ${JSON.stringify(result.data, null, 2)}`);
+                }
+            });
         }
 
         // Testar acesso à Graph API
@@ -656,16 +686,28 @@
                 
                 for (const endpoint of endpoints) {
                     try {
-                        const response = await fetch(`https://graph.facebook.com/v18.0${endpoint}&access_token=${tokenData.token}`);
+                        // CORRIGIR: Construir URL corretamente
+                        let url;
+                        if (endpoint.includes('?')) {
+                            url = `https://graph.facebook.com/v18.0${endpoint}&access_token=${tokenData.token}`;
+                        } else {
+                            url = `https://graph.facebook.com/v18.0${endpoint}?access_token=${tokenData.token}`;
+                        }
+                        
+                        addLog('info', `  🔗 Testando: ${endpoint}`);
+                        
+                        const response = await fetch(url);
                         const data = await response.json();
                         
                         if (data.error) {
                             addLog('error', `  ${endpoint}: ${data.error.message}`);
+                            addLog('warning', `  Código do erro: ${data.error.code || 'N/A'}`);
+                            addLog('warning', `  Tipo do erro: ${data.error.type || 'N/A'}`);
                         } else {
-                            addLog('success', `  ${endpoint}: OK`);
+                            addLog('success', `  ${endpoint}: OK - ID: ${data.id || 'N/A'}`);
                         }
                     } catch (error) {
-                        addLog('error', `  ${endpoint}: ${error.message}`);
+                        addLog('error', `  ${endpoint}: Erro de rede - ${error.message}`);
                     }
                 }
             }
@@ -674,13 +716,29 @@
         // Gerar guia para novos tokens
         function generateNewTokenGuide() {
             addLog('info', '📝 === GUIA PARA GERAR NOVOS TOKENS ===');
+            addLog('warning', '⚠️ PROBLEMA IDENTIFICADO: Tokens inválidos ou expirados');
+            addLog('info', '');
+            addLog('info', '🔧 PASSOS PARA CORRIGIR:');
             addLog('info', '1. Acesse: https://developers.facebook.com/tools/explorer/');
-            addLog('info', '2. Selecione seu app: wa-app-IG');
-            addLog('info', '3. Clique em "Get User Access Token"');
-            addLog('info', '4. Adicione permissões: pages_show_list, instagram_basic, instagram_manage_messages');
+            addLog('info', '2. Selecione seu app: wa-app-IG (1064079752566164)');
+            addLog('info', '3. Em "User or Page", selecione "Get User Access Token"');
+            addLog('info', '4. Adicione estas permissões EXATAS:');
+            addLog('warning', '   ✓ pages_show_list');
+            addLog('warning', '   ✓ instagram_basic');
+            addLog('warning', '   ✓ instagram_manage_messages');
+            addLog('warning', '   ✓ pages_messaging');
             addLog('info', '5. Clique "Generate Access Token"');
-            addLog('info', '6. Copie o token e estenda em: https://developers.facebook.com/tools/debug/accesstoken/');
-            addLog('warning', '⚠️ IMPORTANTE: Certifique-se que as contas Instagram são Business Account');
+            addLog('info', '6. IMPORTANTE: Escolha a página correta durante autorização');
+            addLog('info', '7. Copie o token gerado');
+            addLog('info', '8. Estenda em: https://developers.facebook.com/tools/debug/accesstoken/');
+            addLog('info', '');
+            addLog('error', '🚨 VERIFICAÇÕES CRÍTICAS:');
+            addLog('error', '• Contas Instagram devem ser BUSINESS ACCOUNT');
+            addLog('error', '• Páginas Facebook devem estar CONECTADAS às contas Instagram');
+            addLog('error', '• App deve ter PERMISSÕES aprovadas');
+            addLog('error', '• Verificar em Meta Business Suite se tudo está vinculado');
+            addLog('info', '');
+            addLog('success', '💡 DICA: Teste os novos tokens imediatamente no Graph API Explorer!');
         }
 
         // Adicionar log
