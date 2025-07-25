@@ -321,21 +321,21 @@
     </div>
 
     <script>
-        // Configurações com tokens diretos
+        // Configurações com tokens atualizados
         const CONFIG = {
-            // Tokens Instagram fornecidos
+            // Tokens Instagram NOVOS fornecidos
             instagramTokens: [
                 {
-                    token: 'IGAAR3ZBf0HHjxBZAE95dGVwdmF0TUdNejVZAQmJwamRLYURuNWQwMmZA2SE9WQTYxdFJtMXZA2ZAEpkc3M5X3BiUlRKajFyXzA2ZAmFadHJqcGF3QURsSk5rUWtnRG4tNTNnTEtSUW5Rak9PWVJJcEhxaFd4bXRyODk1S0RhYlNSclc5OAZDZD',
+                    token: 'IGAAR3ZBf0HHjxBZAE1heFNVZAXJQNmZA3ZAVc1bjVaVERoa1k0Q0k2N0IybGtZAeTlNWjhXbkQ2NWRYZAUR2ekx5NnNKdDlfY1d2RlpEV2lwZADQ3RUktSC16UmpnVmZAiQ2JqQVNtN3F2WWJKRTc5SnhSSkE5cWdwVWlmTzhFelVyMzVHVQZDZD',
                     name: 'Conta Instagram 1',
                     username: 'ivangeli_',
                     pageId: '529883964211992',
                     category: 'Organização religiosa'
                 },
                 {
-                    token: 'IGAAR3ZBf0HHjxBZAE1SRVU0cndvSVBVR1hzQVQwTk9QOFBfNUN0d0FXYXBpbVBMMWZAIbGhhYXdTWl9fVUNGenliUHN2U01BUU5sOWdka0hWQWNvTXljZA3c5anZArRXlxQ1hILTNWWkhLOGtpVTlmaWFvNWZAURHBZANzVKXy1rd3lfMAZDZD',
+                    token: 'IGAAR3ZBf0HHjxBZAFAxNVFqQjZApOW1JUlhybWVRN3JCSTdWam1fWF9ZAWjFZAdW5xdUU3VWtIVlA0cHhyUl9KZAFU1WGJWWm00anF2bk9XbmpYbXk3ejdxOHAtWFlNWFlVLWZAuVmFySzFXeEROMVZAPQ1ZAab3p5UWZApOWtoUG5qeFlKYwZDZD',
                     name: 'Conta Instagram 2',
-                    username: 'ide_mics',
+                    username: 'wesley_costa322',
                     pageId: '255538924943656',
                     category: 'Organização religiosa'
                 }
@@ -373,7 +373,7 @@
 
         // Verificar tokens Instagram
         async function verifyInstagramTokens() {
-            addLog('info', '🔍 Verificando tokens Instagram...');
+            addLog('info', '🔍 Verificando tokens Instagram ATUALIZADOS...');
             
             let validTokens = 0;
             
@@ -383,12 +383,12 @@
                     const data = await response.json();
                     
                     if (data.id && !data.error) {
-                        addLog('success', `✅ Token válido para ${account.username} (ID: ${data.id})`);
+                        addLog('success', `✅ Token NOVO válido para ${account.username} (ID: ${data.id})`);
                         account.verified = true;
                         account.instagramId = data.id;
                         validTokens++;
                     } else {
-                        addLog('error', `❌ Token inválido para ${account.username}: ${data.error?.message || 'Token expirado'}`);
+                        addLog('error', `❌ Token inválido para ${account.username}: ${data.error?.message || 'Erro desconhecido'}`);
                         account.verified = false;
                     }
                 } catch (error) {
@@ -398,8 +398,8 @@
             }
             
             if (validTokens > 0) {
-                updateInstagramStatus('connected', `${validTokens} contas válidas`);
-                addLog('success', `✅ ${validTokens} tokens Instagram válidos encontrados`);
+                updateInstagramStatus('connected', `${validTokens} tokens válidos`);
+                addLog('success', `🎉 ${validTokens} tokens Instagram NOVOS funcionando!`);
             } else {
                 updateInstagramStatus('disconnected', 'Tokens inválidos');
                 throw new Error('Nenhum token Instagram válido encontrado');
@@ -492,9 +492,10 @@
                 </div>
                 
                 <div class="token-info">
-                    <strong>🔑 Token Status:</strong> Ativo<br>
+                    <strong>🔑 Token Status:</strong> ✅ ATIVO (Atualizado)<br>
                     <strong>📄 Page ID:</strong> ${account.pageId}<br>
-                    <strong>🔐 Token Preview:</strong> ${account.token.substring(0, 20)}...
+                    <strong>🔐 Token Preview:</strong> ${account.token.substring(0, 20)}...<br>
+                    <strong style="color: #10b981;">🎉 Token novo e funcionando!</strong>
                 </div>
                 
                 <button class="btn btn-success" onclick="setupAccountWebhook('${account.pageId}', '${account.token}')" style="width: 100%; margin-top: 10px;">
