@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram AutoConnect - MultiOne [FIXED]</title>
+    <title>Instagram AutoConnect - MultiOne</title>
     <style>
         * {
             margin: 0;
@@ -46,7 +46,7 @@
             font-size: 1.2rem;
         }
 
-        .fixed-badge {
+        .integration-badge {
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             padding: 8px 16px;
@@ -149,49 +149,32 @@
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(255, 255, 255, 1));
         }
 
-        .account-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .account-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #833ab4, #fd1d1d);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .account-info h3 {
-            margin: 0;
-            color: #333;
-            font-size: 1.3rem;
-        }
-
-        .account-info p {
-            margin: 5px 0 0 0;
-            color: #666;
+        .page-info {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
             font-size: 0.9rem;
         }
 
-        .token-info {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 15px 0;
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
+        .instagram-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
         }
 
-        .token-info strong {
-            color: #333;
+        .instagram-status.connected {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .instagram-status.disconnected {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
         }
 
         .logs-container {
@@ -218,29 +201,31 @@
         .log-warning { color: #fbbf24; border-left-color: #fbbf24; }
         .log-error { color: #f87171; border-left-color: #f87171; }
 
-        .instagram-status {
-            display: flex;
+        .oauth-section {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+            border-radius: 15px;
+            padding: 40px;
+            margin: 30px 0;
+        }
+
+        .oauth-btn {
+            background: #1877f2;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
             align-items: center;
             gap: 10px;
-            margin: 10px 0;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.9rem;
+            transition: all 0.3s ease;
         }
 
-        .instagram-status.connected {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-        }
-
-        .instagram-status.disconnected {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-        }
-
-        .instagram-status.checking {
-            background: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
+        .oauth-btn:hover {
+            background: #166fe5;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(24, 119, 242, 0.3);
         }
 
         @media (max-width: 768px) {
@@ -259,44 +244,64 @@
         <!-- Header -->
         <div class="header">
             <h1>📸 Instagram AutoConnect</h1>
-            <div class="fixed-badge">🔧 VERSÃO CORRIGIDA COM TOKENS</div>
+            <div class="integration-badge">🔗 BACKEND INTEGRADO</div>
             <p>Sistema automatizado de conexão Instagram → MultiOne</p>
         </div>
 
-        <!-- Painel Principal -->
-        <div class="main-panel">
-            <h2 style="margin-bottom: 20px;">🚀 Sistema Inicializado com Tokens</h2>
+        <!-- Seção OAuth -->
+        <div class="oauth-section" id="oauth-section">
+            <h2 style="margin-bottom: 20px;">🚀 Conectar via OAuth</h2>
             <p style="margin-bottom: 30px; color: #666;">
-                Sistema carregado com tokens Instagram pré-configurados. Clique em "Inicializar Sistema" para começar a verificação automática.
+                Clique no botão abaixo para fazer login com Meta e conectar automaticamente suas contas Instagram.
             </p>
             
-            <button class="btn" onclick="initializeSystem()">
-                🔄 Inicializar Sistema Completo
+            <a href="#" class="oauth-btn" onclick="startOAuthFlow()">
+                <span>📘</span>
+                Entrar com Instagram (via Meta)
+            </a>
+            
+            <div style="margin-top: 20px; font-size: 0.9rem; color: #666;">
+                <p>✅ Login seguro via OAuth2 do Meta</p>
+                <p>✅ Configuração automática de webhook</p>
+                <p>✅ Conexão direta com MultiOne</p>
+            </div>
+        </div>
+
+        <!-- Painel Principal -->
+        <div class="main-panel" style="display: none;" id="main-panel">
+            <h2 style="margin-bottom: 20px;">⚙️ Gerenciar Conexões</h2>
+            
+            <button class="btn" onclick="loadUserPages()">
+                📄 Carregar Páginas
             </button>
             
-            <button class="btn btn-success" onclick="testAllConnections()" style="margin-left: 10px;">
-                🧪 Testar Todas as Conexões
+            <button class="btn btn-success" onclick="checkSystemStatus()">
+                🔍 Verificar Status
+            </button>
+            
+            <button class="btn btn-warning" onclick="testMultiOne()">
+                🧪 Testar MultiOne
             </button>
         </div>
 
         <!-- Status da Conexão -->
         <div class="status-panel">
             <div class="status-item">
-                <div class="status-icon status-pending" id="system-status">⏳</div>
-                <div><strong>Sistema</strong></div>
-                <div id="system-text">Aguardando inicialização</div>
+                <div class="status-icon status-disconnected" id="oauth-status">❌</div>
+                <div><strong>OAuth Status</strong></div>
+                <div id="oauth-text">Aguardando login</div>
             </div>
             
             <div class="status-item">
-                <div class="status-icon status-disconnected" id="instagram-status">❌</div>
-                <div><strong>Instagram API</strong></div>
-                <div id="instagram-text">Não testado</div>
+                <div class="status-icon status-disconnected" id="pages-status">❌</div>
+                <div><strong>Páginas</strong></div>
+                <div id="pages-text">Não carregadas</div>
             </div>
             
             <div class="status-item">
-                <div class="status-icon status-disconnected" id="webhook-status">❌</div>
-                <div><strong>Webhook</strong></div>
-                <div id="webhook-text">Não configurado</div>
+                <div class="status-icon status-disconnected" id="webhooks-status">❌</div>
+                <div><strong>Webhooks</strong></div>
+                <div id="webhooks-text">Não configurados</div>
             </div>
             
             <div class="status-item">
@@ -308,348 +313,251 @@
 
         <!-- Contas Instagram -->
         <div class="accounts-grid" id="accounts-grid">
-            <!-- Contas serão carregadas aqui -->
-        </div>
-
-        <!-- Botão de Configuração Global -->
-        <div class="main-panel" style="display: none;" id="config-panel">
-            <h3>⚙️ Configuração Automática</h3>
-            <p style="margin: 15px 0; color: #666;">
-                Todas as contas foram verificadas. Clique abaixo para configurar webhooks automaticamente.
-            </p>
-            <button class="btn btn-success" onclick="setupAllWebhooks()">
-                🔗 Configurar Webhooks para Todas as Contas
-            </button>
+            <!-- Páginas serão carregadas aqui -->
         </div>
 
         <!-- Logs do Sistema -->
         <div class="logs-container" id="logs-container">
             <div class="log-entry log-info">
-                <span>[SISTEMA]</span> Instagram AutoConnect [VERSÃO CORRIGIDA] carregado com tokens pré-configurados.
+                <span>[SISTEMA]</span> Instagram AutoConnect carregado - Integrado com backend OAuth.
             </div>
         </div>
     </div>
 
     <script>
-        // Configurações do sistema com tokens
-        const CONFIG = {
-            facebookAppId: '1064079752566164',
-            webhookUrl: 'https://022056b0-d3be-4467-82af-59a275e7e73f-00-2dvuzufih5js.spock.replit.dev',
-            multioneToken: '66889ce3575111674bb23c2d36c099dd07105a2852aad3b698451b13ec80ae17',
-            
-            // Tokens Instagram pré-configurados
-            instagramTokens: [
-                {
-                    token: 'IGAAR3ZBf0HHjxBZAE95dGVwdmF0TUdNejVZAQmJwamRLYURuNWQwMmZA2SE9WQTYxdFJtMXZA2ZAEpkc3M5X3BiUlRKajFyXzA2ZAmFadHJqcGF3QURsSk5rUWtnRG4tNTNnTEtSUW5Rak9PWVJJcEhxaFd4bXRyODk1S0RhYlNSclc5OAZDZD',
-                    name: 'Conta Instagram 1',
-                    username: 'ivangeli_',
-                    pageId: '529883964211992',
-                    category: 'Organização religiosa'
-                },
-                {
-                    token: 'IGAAR3ZBf0HHjxBZAE1SRVU0cndvSVBVR1hzQVQwTk9QOFBfNUN0d0FXYXBpbVBMMWZAIbGhhYXdTWl9fVUNGenliUHN2U01BUU5sOWdka0hWQWNvTXljZA3c5anZArRXlxQ1hILTNWWkhLOGtpVTlmaWFvNWZAURHBZANzVKXy1rd3lfMAZDZD',
-                    name: 'Conta Instagram 2',
-                    username: 'ide_mics',
-                    pageId: '255538924943656',
-                    category: 'Organização religiosa'
-                }
-            ]
-        };
+        let currentUser = null;
+        let accessToken = null;
+        let userPages = [];
 
-        let systemInitialized = false;
-        let connectedAccounts = [];
-
-        // Inicializar sistema
-        async function initializeSystem() {
-            addLog('info', '🚀 Inicializando sistema com tokens pré-configurados...');
+        // Verificar parâmetros da URL (sucesso OAuth)
+        window.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
             
-            updateSystemStatus('pending', 'Inicializando...');
-            
-            try {
-                // 1. Verificar tokens Instagram
-                await verifyInstagramTokens();
+            if (urlParams.get('success') === 'true') {
+                const userName = urlParams.get('user');
+                addLog('success', `✅ Login realizado com sucesso! Bem-vindo ${userName}`);
                 
-                // 2. Testar conexão MultiOne
-                await testMultiOneConnection();
+                // Limpar URL
+                window.history.replaceState({}, document.title, window.location.pathname);
                 
-                // 3. Carregar informações das contas
-                await loadAccountsInformation();
+                // Mostrar painel principal
+                document.getElementById('oauth-section').style.display = 'none';
+                document.getElementById('main-panel').style.display = 'block';
                 
-                // 4. Mostrar painel de configuração
-                showConfigPanel();
+                updateOAuthStatus('connected', `Conectado como ${userName}`);
                 
-                updateSystemStatus('connected', 'Sistema inicializado');
-                systemInitialized = true;
-                
-                addLog('success', '✅ Sistema inicializado com sucesso!');
-                
-            } catch (error) {
-                addLog('error', `❌ Erro na inicialização: ${error.message}`);
-                updateSystemStatus('disconnected', 'Erro na inicialização');
+                // Carregar páginas automaticamente
+                setTimeout(loadUserPages, 1000);
             }
+            
+            if (urlParams.get('error')) {
+                addLog('error', `❌ Erro OAuth: ${urlParams.get('error')}`);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+
+        // Iniciar fluxo OAuth
+        function startOAuthFlow() {
+            addLog('info', '🔑 Redirecionando para OAuth Meta...');
+            
+            const authUrl = `https://www.facebook.com/v18.0/dialog/oauth?` +
+                `client_id=1064079752566164` +
+                `&redirect_uri=${encodeURIComponent(window.location.origin + '/oauth/callback')}` +
+                `&scope=pages_show_list,instagram_basic,instagram_manage_messages,pages_messaging` +
+                `&response_type=code`;
+            
+            window.location.href = authUrl;
         }
 
-        // Verificar tokens Instagram
-        async function verifyInstagramTokens() {
-            addLog('info', '🔍 Verificando tokens Instagram...');
+        // Carregar páginas do usuário
+        async function loadUserPages() {
+            addLog('info', '📄 Carregando páginas do usuário...');
             
-            let validTokens = 0;
-            
-            for (const account of CONFIG.instagramTokens) {
-                try {
-                    const response = await fetch(`https://graph.facebook.com/v18.0/me?access_token=${account.token}`);
-                    const data = await response.json();
+            try {
+                // Buscar contas conectadas no backend
+                const response = await fetch('/api/connected-accounts');
+                const data = await response.json();
+                
+                if (data.accounts && data.accounts.length > 0) {
+                    const account = data.accounts[0]; // Usar primeira conta
+                    currentUser = account;
                     
-                    if (data.id) {
-                        addLog('success', `✅ Token válido para ${account.username} (ID: ${data.id})`);
-                        account.verified = true;
-                        account.instagramId = data.id;
-                        validTokens++;
-                    } else {
-                        addLog('error', `❌ Token inválido para ${account.username}: ${data.error?.message || 'Erro desconhecido'}`);
-                        account.verified = false;
+                    // Carregar páginas desta conta
+                    const pagesResponse = await fetch(`/api/user/pages?userId=${account.userId}&accessToken=temp`);
+                    const pagesData = await pagesResponse.json();
+                    
+                    if (pagesData.pages) {
+                        userPages = pagesData.pages;
+                        displayPages();
+                        updatePagesStatus('connected', `${userPages.length} páginas`);
+                        addLog('success', `✅ ${userPages.length} páginas carregadas`);
                     }
-                } catch (error) {
-                    addLog('error', `❌ Erro ao verificar token para ${account.username}: ${error.message}`);
-                    account.verified = false;
-                }
-            }
-            
-            if (validTokens > 0) {
-                updateInstagramStatus('connected', `${validTokens} contas conectadas`);
-                addLog('success', `✅ ${validTokens} tokens Instagram válidos encontrados`);
-            } else {
-                updateInstagramStatus('disconnected', 'Nenhuma conta válida');
-                throw new Error('Nenhum token Instagram válido encontrado');
-            }
-        }
-
-        // Testar conexão MultiOne
-        async function testMultiOneConnection() {
-            addLog('info', '🔗 Testando conexão com MultiOne...');
-            
-            try {
-                const response = await fetch(`${CONFIG.webhookUrl}/health`, {
-                    method: 'GET',
-                    timeout: 10000
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    updateMultiOneStatus('connected', 'Conectado');
-                    addLog('success', '✅ MultiOne conectado com sucesso');
-                    return true;
                 } else {
-                    throw new Error(`HTTP ${response.status}`);
+                    addLog('warning', '⚠️ Nenhuma conta conectada encontrada');
                 }
+                
             } catch (error) {
-                addLog('warning', `⚠️ MultiOne não responde: ${error.message}`);
-                updateMultiOneStatus('pending', 'Sem resposta');
-                // Não falhar o sistema por causa do MultiOne
-                return false;
+                addLog('error', `❌ Erro ao carregar páginas: ${error.message}`);
+                updatePagesStatus('disconnected', 'Erro ao carregar');
             }
         }
 
-        // Carregar informações das contas
-        async function loadAccountsInformation() {
-            addLog('info', '📱 Carregando informações das contas Instagram...');
-            
+        // Exibir páginas
+        function displayPages() {
             const accountsGrid = document.getElementById('accounts-grid');
             accountsGrid.innerHTML = '';
             
-            for (const account of CONFIG.instagramTokens) {
-                if (!account.verified) continue;
+            userPages.forEach(page => {
+                const pageElement = document.createElement('div');
+                pageElement.className = 'account-card';
                 
-                try {
-                    // Buscar informações detalhadas da conta
-                    const response = await fetch(`https://graph.facebook.com/v18.0/${account.instagramId}?fields=id,username,name,profile_picture_url,followers_count,media_count&access_token=${account.token}`);
-                    const data = await response.json();
-                    
-                    if (data.id) {
-                        account.details = data;
-                        createAccountCard(account);
-                        connectedAccounts.push(account);
-                        addLog('success', `✅ Dados carregados para @${data.username}`);
-                    } else {
-                        addLog('error', `❌ Erro ao carregar dados para ${account.username}: ${data.error?.message}`);
-                    }
-                } catch (error) {
-                    addLog('error', `❌ Erro ao carregar ${account.username}: ${error.message}`);
+                const hasInstagram = page.instagram_account !== null;
+                if (hasInstagram) {
+                    pageElement.classList.add('connected');
                 }
-            }
-        }
-
-        // Criar card da conta
-        function createAccountCard(account) {
-            const accountsGrid = document.getElementById('accounts-grid');
-            const details = account.details;
-            
-            const cardElement = document.createElement('div');
-            cardElement.className = 'account-card connected';
-            cardElement.innerHTML = `
-                <div class="account-header">
-                    <div class="account-avatar">
-                        ${details.profile_picture_url ? 
-                            `<img src="${details.profile_picture_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : 
-                            details.username.charAt(0).toUpperCase()
-                        }
+                
+                pageElement.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #833ab4, #fd1d1d); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                            ${page.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; color: #333;">${page.name}</h3>
+                            <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">${page.category}</p>
+                        </div>
                     </div>
-                    <div class="account-info">
-                        <h3>@${details.username}</h3>
-                        <p>${details.name || account.name}</p>
-                        <p>${account.category}</p>
+                    
+                    <div class="instagram-status ${hasInstagram ? 'connected' : 'disconnected'}">
+                        <span>${hasInstagram ? '✅' : '❌'}</span>
+                        <span>${hasInstagram ? 'Instagram Conectado' : 'Instagram Não Conectado'}</span>
                     </div>
-                </div>
+                    
+                    <div class="page-info">
+                        <strong>📄 Page ID:</strong> ${page.id}<br>
+                        <strong>🔑 Access Token:</strong> ${page.access_token ? 'Ativo' : 'Não disponível'}<br>
+                        ${hasInstagram ? `<strong>📸 Instagram ID:</strong> ${page.instagram_account.id}` : ''}
+                    </div>
+                    
+                    ${hasInstagram ? `
+                        <button class="btn btn-success" onclick="setupWebhook('${page.id}', '${page.access_token}')" style="width: 100%; margin-top: 10px;">
+                            🔗 Configurar Webhook
+                        </button>
+                    ` : `
+                        <p style="color: #f59e0b; font-size: 0.9rem; margin-top: 10px;">
+                            ⚠️ Conecte uma conta Instagram a esta página no Meta Business Suite
+                        </p>
+                    `}
+                `;
                 
-                <div class="instagram-status connected">
-                    <span>✅</span>
-                    <span>Instagram Conectado</span>
-                </div>
-                
-                <div style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 0.9rem;">
-                    <strong>📊 Estatísticas:</strong><br>
-                    Seguidores: ${details.followers_count?.toLocaleString() || 'N/A'}<br>
-                    Posts: ${details.media_count?.toLocaleString() || 'N/A'}<br>
-                    ID Instagram: ${details.id}
-                </div>
-                
-                <div class="token-info">
-                    <strong>🔑 Token Status:</strong> Ativo<br>
-                    <strong>📄 Page ID:</strong> ${account.pageId}<br>
-                    <strong>🔐 Token Preview:</strong> ${account.token.substring(0, 20)}...
-                </div>
-                
-                <button class="btn btn-success" onclick="setupAccountWebhook('${account.instagramId}')" style="width: 100%; margin-top: 10px;">
-                    🔗 Configurar Webhook
-                </button>
-            `;
-            
-            accountsGrid.appendChild(cardElement);
+                accountsGrid.appendChild(pageElement);
+            });
         }
 
-        // Mostrar painel de configuração
-        function showConfigPanel() {
-            const configPanel = document.getElementById('config-panel');
-            configPanel.style.display = 'block';
-        }
-
-        // Configurar webhook para conta específica
-        async function setupAccountWebhook(instagramId) {
-            const account = CONFIG.instagramTokens.find(acc => acc.instagramId === instagramId);
-            if (!account) {
-                addLog('error', '❌ Conta não encontrada');
-                return;
-            }
-            
-            addLog('info', `🔗 Configurando webhook para @${account.details.username}...`);
+        // Configurar webhook
+        async function setupWebhook(pageId, pageAccessToken) {
+            addLog('info', `🔗 Configurando webhook para página ${pageId}...`);
             
             try {
-                // Simular configuração de webhook (substitua pela implementação real)
-                const webhookConfig = {
-                    object: 'instagram',
-                    callback_url: `${CONFIG.webhookUrl}/webhook`,
-                    fields: ['messages', 'messaging_postbacks', 'messaging_optins'],
-                    access_token: account.token
-                };
+                const response = await fetch('/api/setup-webhook', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pageId: pageId,
+                        pageAccessToken: pageAccessToken,
+                        userId: currentUser?.userId || 'unknown'
+                    })
+                });
                 
-                addLog('info', `📡 Enviando configuração de webhook...`);
+                const data = await response.json();
                 
-                // Em produção, você faria a chamada real para a API
-                // const response = await fetch('https://graph.facebook.com/v18.0/subscriptions', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify(webhookConfig)
-                // });
-                
-                // Simular sucesso por enquanto
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                addLog('success', `✅ Webhook configurado para @${account.details.username}`);
-                updateWebhookStatus('connected', 'Configurado');
-                
-                // Notificar MultiOne
-                await notifyMultiOne(account);
+                if (data.success) {
+                    addLog('success', `✅ Webhook configurado com sucesso!`);
+                    addLog('info', `📡 URL: ${data.webhookUrl}`);
+                    updateWebhooksStatus('connected', 'Configurado');
+                } else {
+                    throw new Error(data.error || 'Erro desconhecido');
+                }
                 
             } catch (error) {
                 addLog('error', `❌ Erro ao configurar webhook: ${error.message}`);
             }
         }
 
-        // Configurar todos os webhooks
-        async function setupAllWebhooks() {
-            addLog('info', '🔗 Configurando webhooks para todas as contas...');
+        // Verificar status do sistema
+        async function checkSystemStatus() {
+            addLog('info', '🔍 Verificando status do sistema...');
             
-            for (const account of connectedAccounts) {
-                await setupAccountWebhook(account.instagramId);
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Aguardar entre requests
-            }
-            
-            addLog('success', '🎉 Todos os webhooks configurados!');
-        }
-
-        // Notificar MultiOne sobre nova conexão
-        async function notifyMultiOne(account) {
             try {
-                const notification = {
-                    type: 'instagram_connected',
-                    account: {
-                        instagram_id: account.instagramId,
-                        username: account.details.username,
-                        name: account.details.name,
-                        page_id: account.pageId,
-                        token: account.token.substring(0, 20) + '...' // Token mascarado para log
-                    },
-                    timestamp: new Date().toISOString()
-                };
+                const response = await fetch('/api/system/status');
+                const data = await response.json();
                 
-                // Em produção, enviar para MultiOne
-                // await fetch(`${CONFIG.webhookUrl}/notify`, {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify(notification)
-                // });
+                addLog('success', `✅ Sistema ativo - ${data.accounts.total} contas, ${data.webhooks.active} webhooks ativos`);
                 
-                addLog('success', `📢 MultiOne notificado sobre @${account.details.username}`);
+                // Atualizar interface com dados do sistema
+                if (data.accounts.total > 0) {
+                    updateOAuthStatus('connected', `${data.accounts.total} contas`);
+                }
+                
+                if (data.webhooks.active > 0) {
+                    updateWebhooksStatus('connected', `${data.webhooks.active} ativos`);
+                }
+                
             } catch (error) {
-                addLog('warning', `⚠️ Falha ao notificar MultiOne: ${error.message}`);
+                addLog('error', `❌ Erro ao verificar status: ${error.message}`);
             }
         }
 
-        // Testar todas as conexões
-        async function testAllConnections() {
-            addLog('info', '🧪 Testando todas as conexões...');
+        // Testar MultiOne
+        async function testMultiOne() {
+            addLog('info', '🧪 Testando conexão MultiOne...');
             
             try {
-                await verifyInstagramTokens();
-                await testMultiOneConnection();
-                addLog('success', '✅ Todos os testes concluídos!');
+                const response = await fetch('/api/test/multione', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('success', '✅ MultiOne conectado e funcionando!');
+                    updateMultiOneStatus('connected', 'Conectado');
+                } else {
+                    throw new Error(data.error || 'Teste falhou');
+                }
+                
             } catch (error) {
-                addLog('error', `❌ Erro nos testes: ${error.message}`);
+                addLog('error', `❌ Erro no teste MultiOne: ${error.message}`);
+                updateMultiOneStatus('disconnected', 'Falha no teste');
             }
         }
 
         // Funções de atualização de status
-        function updateSystemStatus(status, text) {
-            const icon = document.getElementById('system-status');
-            const textEl = document.getElementById('system-text');
-            
-            icon.className = `status-icon status-${status}`;
-            icon.textContent = status === 'connected' ? '✅' : status === 'pending' ? '⏳' : '❌';
-            textEl.textContent = text;
-        }
-
-        function updateInstagramStatus(status, text) {
-            const icon = document.getElementById('instagram-status');
-            const textEl = document.getElementById('instagram-text');
+        function updateOAuthStatus(status, text) {
+            const icon = document.getElementById('oauth-status');
+            const textEl = document.getElementById('oauth-text');
             
             icon.className = `status-icon status-${status}`;
             icon.textContent = status === 'connected' ? '✅' : '❌';
             textEl.textContent = text;
         }
 
-        function updateWebhookStatus(status, text) {
-            const icon = document.getElementById('webhook-status');
-            const textEl = document.getElementById('webhook-text');
+        function updatePagesStatus(status, text) {
+            const icon = document.getElementById('pages-status');
+            const textEl = document.getElementById('pages-text');
+            
+            icon.className = `status-icon status-${status}`;
+            icon.textContent = status === 'connected' ? '✅' : '❌';
+            textEl.textContent = text;
+        }
+
+        function updateWebhooksStatus(status, text) {
+            const icon = document.getElementById('webhooks-status');
+            const textEl = document.getElementById('webhooks-text');
             
             icon.className = `status-icon status-${status}`;
             icon.textContent = status === 'connected' ? '✅' : '❌';
@@ -661,7 +569,7 @@
             const textEl = document.getElementById('multione-text');
             
             icon.className = `status-icon status-${status}`;
-            icon.textContent = status === 'connected' ? '✅' : status === 'pending' ? '⏳' : '❌';
+            icon.textContent = status === 'connected' ? '✅' : '❌';
             textEl.textContent = text;
         }
 
@@ -676,17 +584,21 @@
             
             logsContainer.insertBefore(logEntry, logsContainer.firstChild);
             
-            // Manter apenas 100 logs
-            while (logsContainer.children.length > 100) {
+            // Manter apenas 50 logs
+            while (logsContainer.children.length > 50) {
                 logsContainer.removeChild(logsContainer.lastChild);
             }
         }
 
-        // Inicialização automática quando página carrega
-        document.addEventListener('DOMContentLoaded', function() {
-            addLog('info', '📱 Sistema carregado com tokens Instagram pré-configurados');
-            addLog('info', '💡 Clique em "Inicializar Sistema Completo" para começar');
-        });
+        // Verificar saúde do sistema na inicialização
+        fetch('/health')
+            .then(response => response.json())
+            .then(data => {
+                addLog('success', `✅ Backend conectado - ${data.connections.connectedAccounts} contas ativas`);
+            })
+            .catch(error => {
+                addLog('warning', `⚠️ Backend não responde: ${error.message}`);
+            });
     </script>
 </body>
 </html>
