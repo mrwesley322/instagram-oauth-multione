@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔍 Debug em Tempo Real</title>
+    <title>🔬 Teste Final Definitivo</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #dc2626, #991b1b, #7f1d1d);
+            background: linear-gradient(135deg, #7c3aed, #5b21b6, #4c1d95);
             min-height: 100vh;
             padding: 20px;
         }
@@ -35,14 +35,14 @@
 
         .header h1 {
             font-size: 2.5rem;
-            background: linear-gradient(135deg, #dc2626, #991b1b);
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
         }
 
-        .alert-badge {
-            background: linear-gradient(135deg, #dc2626, #991b1b);
+        .final-badge {
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -52,413 +52,421 @@
             margin: 5px;
         }
 
-        .live-monitor {
-            background: #1f2937;
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .test-card {
+            background: white;
             border-radius: 15px;
-            padding: 25px;
-            margin: 20px 0;
-            min-height: 400px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid #e5e7eb;
         }
 
-        .monitor-header {
-            color: #f9fafb;
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #10b981;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .logs-live {
-            color: #f9fafb;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            max-height: 350px;
-            overflow-y: auto;
-            line-height: 1.6;
-        }
-
-        .log-entry {
-            margin-bottom: 8px;
-            padding: 8px;
-            border-radius: 4px;
-            border-left: 3px solid transparent;
-        }
-
-        .log-info { 
-            color: #60a5fa; 
-            border-left-color: #60a5fa;
-            background: rgba(96, 165, 250, 0.1);
-        }
-        .log-success { 
-            color: #34d399; 
-            border-left-color: #34d399;
-            background: rgba(52, 211, 153, 0.1);
-        }
-        .log-warning { 
-            color: #fbbf24; 
-            border-left-color: #fbbf24;
-            background: rgba(251, 191, 36, 0.1);
-        }
-        .log-error { 
-            color: #f87171; 
-            border-left-color: #f87171;
-            background: rgba(248, 113, 113, 0.1);
-        }
-        .log-webhook {
-            color: #a78bfa;
-            border-left-color: #a78bfa;
-            background: rgba(167, 139, 250, 0.1);
-            font-weight: 600;
-        }
-
-        .test-panel {
-            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(255, 255, 255, 1));
-            border: 2px solid #dc2626;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 20px 0;
-            text-align: center;
+        .test-card.critical {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(255, 255, 255, 1));
         }
 
         .btn {
-            background: linear-gradient(135deg, #dc2626, #991b1b);
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
+            padding: 12px 20px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 1.1rem;
-            margin: 10px;
+            width: 100%;
+            margin: 10px 0;
+            font-size: 1rem;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4);
+            box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
         }
 
         .btn-success {
             background: linear-gradient(135deg, #10b981, #059669);
         }
 
-        .instructions {
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
+        .result-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
+            border-left: 4px solid #7c3aed;
+        }
+
+        .critical-info {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
             border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
         }
 
-        .step {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-            border-left: 4px solid #dc2626;
+        .webhook-test {
+            background: #f0f9ff;
+            border: 2px solid #3b82f6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
         }
 
-        .auto-refresh {
-            text-align: center;
+        .live-monitor {
+            background: #1f2937;
+            border-radius: 10px;
+            padding: 20px;
             margin: 20px 0;
-            color: #666;
-            font-size: 0.9rem;
+            min-height: 300px;
         }
+
+        .monitor-logs {
+            color: #f9fafb;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .log-webhook { background: rgba(167, 139, 250, 0.2); color: #c4b5fd; }
+        .log-success { background: rgba(52, 211, 153, 0.2); color: #6ee7b7; }
+        .log-error { background: rgba(248, 113, 113, 0.2); color: #fca5a5; }
+        .log-info { background: rgba(96, 165, 250, 0.2); color: #93c5fd; }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🔍 Debug em Tempo Real</h1>
-            <div class="alert-badge">🚨 TESTADOR → TESTADOR NÃO FUNCIONOU</div>
-            <div class="alert-badge">📡 MONITORAMENTO ATIVO</div>
-            <p>Vamos ver em tempo real o que acontece quando você envia mensagem</p>
+            <h1>🔬 Teste Final Definitivo</h1>
+            <div class="final-badge">🚨 MENSAGEM NÃO SUBIU</div>
+            <div class="final-badge">🔬 DIAGNÓSTICO FINAL</div>
+            <p>Última verificação - vamos identificar o problema exato</p>
         </div>
 
-        <!-- Instruções -->
-        <div class="instructions">
-            <h3 style="color: #f59e0b; margin-bottom: 15px;">📱 TESTE EM TEMPO REAL:</h3>
-            
-            <div class="step">
-                <strong>1.</strong> Mantenha esta tela aberta e monitorando
+        <!-- Problema Crítico -->
+        <div class="critical-info">
+            <h3 style="color: #ef4444; margin-bottom: 15px;">🚨 DISCREPÂNCIA IDENTIFICADA:</h3>
+            <p><strong>Sistema configurado:</strong> sock.multi360.digital</p>
+            <p><strong>Painel real:</strong> painel.multione.digital</p>
+            <p><strong>Suspeita:</strong> URL do MultiOne pode estar incorreta!</p>
+        </div>
+
+        <!-- Testes Críticos Finais -->
+        <div class="test-grid">
+            <!-- 1. Teste URLs MultiOne -->
+            <div class="test-card critical">
+                <h3 style="color: #ef4444; margin-bottom: 15px;">1. 🌐 URLs MultiOne</h3>
+                <button class="btn btn-danger" onclick="testMultiOneUrls()">
+                    🔍 Testar URLs MultiOne
+                </button>
+                <div class="result-box" id="url-result" style="display: none;">
+                    Aguardando teste...
+                </div>
             </div>
-            <div class="step">
-                <strong>2.</strong> Com o celular, faça login como <strong>ivangeli_</strong>
+
+            <!-- 2. Webhook Real Time -->
+            <div class="test-card critical">
+                <h3 style="color: #ef4444; margin-bottom: 15px;">2. 📡 Webhook Tempo Real</h3>
+                <button class="btn" onclick="startRealTimeMonitor()">
+                    📡 Monitor Tempo Real
+                </button>
+                <div class="result-box" id="webhook-monitor" style="display: none;">
+                    Aguardando ativação...
+                </div>
             </div>
-            <div class="step">
-                <strong>3.</strong> Envie DM para <strong>@wesley_costa322</strong> escrevendo: <strong>"TESTE DEBUG"</strong>
+
+            <!-- 3. Envio Manual -->
+            <div class="test-card">
+                <h3 style="margin-bottom: 15px;">3. 🧪 Envio Manual</h3>
+                <button class="btn btn-success" onclick="sendManualMessage()">
+                    📨 Enviar Mensagem Manual
+                </button>
+                <div class="result-box" id="manual-result" style="display: none;">
+                    Aguardando envio...
+                </div>
             </div>
-            <div class="step">
-                <strong>4.</strong> Observe os logs em tempo real aqui
+
+            <!-- 4. Webhook Direto -->
+            <div class="test-card">
+                <h3 style="margin-bottom: 15px;">4. 🎯 Webhook Direto</h3>
+                <button class="btn" onclick="triggerWebhookDirect()">
+                    🎯 Acionar Webhook Direto
+                </button>
+                <div class="result-box" id="direct-result" style="display: none;">
+                    Aguardando ação...
+                </div>
             </div>
         </div>
 
-        <!-- Monitor ao Vivo -->
+        <!-- Teste de Webhook em Tempo Real -->
+        <div class="webhook-test">
+            <h3 style="color: #3b82f6; margin-bottom: 15px;">📱 TESTE EM TEMPO REAL</h3>
+            <p style="margin-bottom: 20px;">
+                <strong>AGORA:</strong> Envie DM de ivangeli_ para wesley_costa322<br>
+                <strong>TEXTO:</strong> "TESTE FINAL DEFINITIVO"<br>
+                <strong>MONITORAMENTO:</strong> Ativo abaixo
+            </p>
+            <button class="btn" onclick="startFullMonitoring()">
+                🔄 INICIAR MONITORAMENTO COMPLETO
+            </button>
+        </div>
+
+        <!-- Monitor em Tempo Real -->
         <div class="live-monitor">
-            <div class="monitor-header">
-                <div class="status-dot"></div>
-                📡 Monitoramento em Tempo Real - Backend Logs
+            <h3 style="color: #f9fafb; margin-bottom: 15px;">📊 Monitor em Tempo Real</h3>
+            <div class="monitor-logs" id="live-monitor">
+                <div class="log-entry log-info">[MONITOR] Sistema carregado - aguardando teste...</div>
             </div>
-            <div class="logs-live" id="live-logs">
-                <div class="log-info">[MONITOR] Sistema iniciado - aguardando mensagens...</div>
-                <div class="log-warning">[TESTE] Envie DM: ivangeli_ → wesley_costa322</div>
-            </div>
-        </div>
-
-        <!-- Controles -->
-        <div class="test-panel">
-            <h3 style="color: #dc2626; margin-bottom: 15px;">🎛️ Controles de Debug</h3>
-            
-            <button class="btn" onclick="startMonitoring()">
-                🔄 Iniciar Monitoramento
-            </button>
-            
-            <button class="btn btn-success" onclick="testNewToken()">
-                🔑 Testar Novo Token
-            </button>
-            
-            <button class="btn" onclick="updateBackendToken()">
-                🔄 Atualizar Backend
-            </button>
-            
-            <button class="btn" onclick="clearLogs()">
-                🗑️ Limpar Logs
-            </button>
-        </div>
-
-        <div class="auto-refresh" id="refresh-status">
-            🔄 Atualizando logs a cada 2 segundos...
         </div>
     </div>
 
     <script>
         const BACKEND_URL = 'https://instagram-oauth-multione-production.up.railway.app';
-        // Novo token atualizado
-        const NEW_TOKEN = 'EAAPHxlZBqFZAQBPPYeJ1czeKl2RFZAF0nbPZAN1pbRQjW03CDtdGkhHoldbpcMvSAEcdeN44Fmu1N7EZB7ZANxicuZCxR0wSwuSyaOAgiRh3jTZCVd5f6jjxDRJbbXuqB9MhRxZAMXMMsxuFZBdZAII2Fkho33Tb5wJ4InIbg7roqb978HpgR5n0Ppq0KfS2t2xcA9bYsKEr2MawPMg64LCwV1fFOE8ZBXHOEPEKPZBTHCxSLvW8BwAMoPJHebgZDZD';
-        let monitoring = false;
-        let monitorInterval = null;
-        let lastLogCount = 0;
-
-        // Iniciar monitoramento automático
-        function startMonitoring() {
-            if (monitoring) {
-                stopMonitoring();
-                return;
-            }
-            
-            monitoring = true;
-            document.querySelector('.btn').textContent = '⏹️ Parar Monitoramento';
-            addLocalLog('success', 'Monitoramento iniciado');
-            
-            // Atualizar logs a cada 2 segundos
-            monitorInterval = setInterval(fetchLogs, 2000);
-            fetchLogs(); // Primeira busca imediata
-        }
-
-        function stopMonitoring() {
-            monitoring = false;
-            if (monitorInterval) clearInterval(monitorInterval);
-            document.querySelector('.btn').textContent = '🔄 Iniciar Monitoramento';
-            addLocalLog('warning', 'Monitoramento parado');
-        }
-
-        // Buscar logs do backend
-        async function fetchLogs() {
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/logs`);
-                const data = await response.json();
-                
-                if (response.ok && data.logs) {
-                    displayLogs(data.logs);
-                } else {
-                    addLocalLog('error', 'Erro ao buscar logs do backend');
-                }
-            } catch (error) {
-                addLocalLog('error', `Erro na conexão: ${error.message}`);
-            }
-        }
-
-        // Exibir logs
-        function displayLogs(logs) {
-            const container = document.getElementById('live-logs');
-            
-            // Se há novos logs
-            if (logs.length > lastLogCount) {
-                // Limpar logs antigos e mostrar os mais recentes
-                container.innerHTML = '';
-                
-                // Mostrar últimos 20 logs
-                const recentLogs = logs.slice(0, 20);
-                
-                recentLogs.forEach(log => {
-                    const logElement = document.createElement('div');
-                    
-                    // Classificar tipo do log
-                    let logType = 'info';
-                    if (log.message.includes('Webhook') || log.message.includes('Instagram')) {
-                        logType = 'webhook';
-                    } else if (log.message.includes('erro') || log.message.includes('❌')) {
-                        logType = 'error';
-                    } else if (log.message.includes('✅') || log.message.includes('sucesso')) {
-                        logType = 'success';
-                    } else if (log.message.includes('⚠️') || log.message.includes('warning')) {
-                        logType = 'warning';
-                    }
-                    
-                    logElement.className = `log-entry log-${logType}`;
-                    logElement.innerHTML = `<strong>[${log.timestamp || new Date().toLocaleTimeString()}]</strong> ${log.message}`;
-                    
-                    container.appendChild(logElement);
-                });
-                
-                lastLogCount = logs.length;
-                
-                // Destacar se houve atividade de webhook
-                const webhookLogs = logs.filter(log => 
-                    log.message.includes('Webhook') || 
-                    log.message.includes('Instagram') ||
-                    log.message.includes('mensagem')
-                );
-                
-                if (webhookLogs.length > 0) {
-                    addLocalLog('webhook', `🎯 ATIVIDADE DETECTADA: ${webhookLogs.length} logs de webhook`);
-                }
-            }
-        }
-
-        // Adicionar log local
-        function addLocalLog(type, message) {
-            const container = document.getElementById('live-logs');
-            const timestamp = new Date().toLocaleTimeString();
-            
-            const logElement = document.createElement('div');
-            logElement.className = `log-entry log-${type}`;
-            logElement.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
-            
-            container.insertBefore(logElement, container.firstChild);
-            
-            // Manter apenas 30 logs locais
-            while (container.children.length > 30) {
-                container.removeChild(container.lastChild);
-            }
-        }
-
-        // Testar novo token
-        async function testNewToken() {
-            addLocalLog('info', '🔑 Testando novo token...');
-            
-            try {
-                // Testar token
-                const response = await fetch(`https://graph.facebook.com/v23.0/me?access_token=${NEW_TOKEN}`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    addLocalLog('error', `❌ Token inválido: ${data.error.message}`);
-                    return;
-                }
-                
-                addLocalLog('success', `✅ Token válido: ${data.name}`);
-                
-                // Obter páginas
-                const pagesResponse = await fetch(`https://graph.facebook.com/v23.0/me/accounts?access_token=${NEW_TOKEN}`);
-                const pagesData = await pagesResponse.json();
-                
-                if (pagesData.data) {
-                    const targetPage = pagesData.data.find(page => page.id === '752860274568592');
-                    if (targetPage) {
-                        addLocalLog('success', `✅ Página encontrada: ${targetPage.name}`);
-                        addLocalLog('info', `🔑 Page Token: ${targetPage.access_token.substring(0, 30)}...`);
-                        
-                        // Verificar Instagram conectado
-                        const igResponse = await fetch(`https://graph.facebook.com/v23.0/752860274568592?fields=instagram_business_account&access_token=${targetPage.access_token}`);
-                        const igData = await igResponse.json();
-                        
-                        if (igData.instagram_business_account) {
-                            addLocalLog('success', `✅ Instagram conectado: ${igData.instagram_business_account.id}`);
-                        } else {
-                            addLocalLog('warning', '⚠️ Instagram não conectado via API');
-                        }
-                    } else {
-                        addLocalLog('error', '❌ Página não encontrada');
-                    }
-                }
-                
-            } catch (error) {
-                addLocalLog('error', `❌ Erro: ${error.message}`);
-            }
-        }
         
-        // Atualizar backend com novo token
-        async function updateBackendToken() {
-            addLocalLog('info', '🔄 Atualizando backend com novo token...');
+        // URLs possíveis do MultiOne
+        const MULTIONE_URLS = [
+            'https://sock.multi360.digital/api/messages/send',
+            'https://painel.multione.digital/api/messages/send',
+            'https://api.multione.digital/messages/send',
+            'https://multione.digital/api/messages/send'
+        ];
+
+        let monitoringActive = false;
+        let monitorInterval = null;
+
+        // Testar URLs do MultiOne
+        async function testMultiOneUrls() {
+            addLog('info', '🌐 Testando diferentes URLs do MultiOne...');
+            updateResult('url-result', '🌐 Testando URLs...');
+            
+            const results = [];
+            
+            for (const url of MULTIONE_URLS) {
+                try {
+                    addLog('info', `🔍 Testando: ${url}`);
+                    
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer 68eff5505a3989e99dadbc7243c9411efba9a80ef1f59e4680c89678bf63f515'
+                        },
+                        body: JSON.stringify({
+                            number: 'test_final',
+                            message: 'Teste URL MultiOne',
+                            sender_id: 'test_url',
+                            sender_name: 'Teste URL',
+                            platform: 'instagram',
+                            timestamp: new Date().toISOString(),
+                            type: 'inbound'
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        results.push(`✅ ${url}: FUNCIONOU!`);
+                        addLog('success', `✅ URL funcionou: ${url}`);
+                    } else {
+                        results.push(`❌ ${url}: ${response.status}`);
+                        addLog('error', `❌ ${url}: Status ${response.status}`);
+                    }
+                    
+                } catch (error) {
+                    results.push(`❌ ${url}: ${error.message}`);
+                    addLog('error', `❌ ${url}: ${error.message}`);
+                }
+            }
+            
+            updateResult('url-result', `🌐 Resultados dos testes:
+
+${results.join('\n')}
+
+💡 Se alguma URL funcionou, essa é a correta!`);
+        }
+
+        // Monitor em tempo real
+        async function startRealTimeMonitor() {
+            addLog('info', '📡 Iniciando monitor de webhook...');
+            updateResult('webhook-monitor', '📡 Monitorando webhooks...');
+            
+            monitoringActive = true;
+            monitorInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${BACKEND_URL}/api/logs`);
+                    const data = await response.json();
+                    
+                    if (data.logs) {
+                        const webhookLogs = data.logs.filter(log => 
+                            log.message.includes('Webhook') || 
+                            log.message.includes('mensagem') ||
+                            log.message.includes('Instagram') ||
+                            log.message.includes('MultiOne')
+                        ).slice(0, 5);
+                        
+                        if (webhookLogs.length > 0) {
+                            updateResult('webhook-monitor', `📡 Atividade detectada:
+
+${webhookLogs.map(log => `[${log.timestamp}] ${log.message}`).join('\n')}
+
+${webhookLogs.length > 5 ? '...' : ''}`);
+                        }
+                    }
+                } catch (error) {
+                    addLog('error', `Erro no monitor: ${error.message}`);
+                }
+            }, 3000);
+        }
+
+        // Envio manual
+        async function sendManualMessage() {
+            addLog('info', '📨 Enviando mensagem manual...');
+            updateResult('manual-result', '📨 Enviando...');
             
             try {
-                // Primeiro obter page token
-                const pagesResponse = await fetch(`https://graph.facebook.com/v23.0/me/accounts?access_token=${NEW_TOKEN}`);
-                const pagesData = await pagesResponse.json();
-                
-                const targetPage = pagesData.data.find(page => page.id === '752860274568592');
-                if (!targetPage) {
-                    addLocalLog('error', '❌ Página não encontrada');
-                    return;
-                }
-                
-                // Atualizar backend
-                const response = await fetch(`${BACKEND_URL}/api/setup-webhook`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        pageId: '752860274568592',
-                        pageAccessToken: targetPage.access_token,
-                        userId: 'wesley_costa322'
-                    })
+                const response = await fetch(`${BACKEND_URL}/api/test/multione`, {
+                    method: 'POST'
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    addLocalLog('success', '✅ Backend atualizado com novo token');
+                    updateResult('manual-result', `✅ Mensagem enviada!
+
+📨 Resposta: ${JSON.stringify(data.result, null, 2)}
+
+💡 Se isso funcionou, o problema é que o Instagram não está enviando webhooks.`);
+                    addLog('success', '✅ Envio manual funcionou');
                 } else {
-                    addLocalLog('error', `❌ Erro no backend: ${data.error}`);
+                    updateResult('manual-result', `❌ Falha no envio:
+
+${data.error}
+
+💡 Problema na conexão com MultiOne.`);
+                    addLog('error', `❌ Envio manual falhou: ${data.error}`);
                 }
                 
             } catch (error) {
-                addLocalLog('error', `❌ Erro na atualização: ${error.message}`);
+                updateResult('manual-result', `❌ Erro:
+
+${error.message}`);
+                addLog('error', `❌ Erro no envio: ${error.message}`);
             }
         }
 
-        // Limpar logs
-        function clearLogs() {
-            document.getElementById('live-logs').innerHTML = '';
-            addLocalLog('info', 'Logs limpos - aguardando atividade...');
-            lastLogCount = 0;
+        // Webhook direto
+        async function triggerWebhookDirect() {
+            addLog('info', '🎯 Acionando webhook direto...');
+            updateResult('direct-result', '🎯 Enviando webhook...');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/webhook/instagram`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        object: 'instagram',
+                        entry: [{
+                            id: '752860274568592',
+                            messaging: [{
+                                sender: { id: 'debug_final' },
+                                recipient: { id: '752860274568592' },
+                                timestamp: Date.now(),
+                                message: {
+                                    mid: 'debug_final_' + Date.now(),
+                                    text: 'TESTE FINAL DEFINITIVO'
+                                }
+                            }]
+                        }]
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.text();
+                    updateResult('direct-result', `✅ Webhook acionado!
+
+📡 Status: ${response.status}
+📝 Resposta: ${result}
+
+💡 Se isso processar mensagem, o webhook funciona internamente.`);
+                    addLog('webhook', '🎯 Webhook direto acionado');
+                } else {
+                    updateResult('direct-result', `❌ Webhook falhou:
+
+📡 Status: ${response.status}`);
+                    addLog('error', `❌ Webhook direto falhou: ${response.status}`);
+                }
+                
+            } catch (error) {
+                updateResult('direct-result', `❌ Erro:
+
+${error.message}`);
+                addLog('error', `❌ Erro webhook direto: ${error.message}`);
+            }
+        }
+
+        // Monitoramento completo
+        async function startFullMonitoring() {
+            addLog('info', '🔄 Iniciando monitoramento completo...');
+            
+            await testMultiOneUrls();
+            await startRealTimeMonitor();
+            await sendManualMessage();
+            await triggerWebhookDirect();
+            
+            addLog('success', '🎉 Monitoramento completo ativo');
+            addLog('info', '📱 AGORA: Envie DM de ivangeli_ para wesley_costa322');
+        }
+
+        // Utilitários
+        function updateResult(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.innerHTML = `<pre style="white-space: pre-wrap; margin: 0; font-size: 0.8rem;">${message}</pre>`;
+        }
+
+        function addLog(type, message) {
+            const monitor = document.getElementById('live-monitor');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            
+            monitor.insertBefore(logEntry, monitor.firstChild);
+            
+            while (monitor.children.length > 20) {
+                monitor.removeChild(monitor.lastChild);
+            }
         }
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            addLocalLog('success', '🔍 Debug em tempo real carregado');
-            addLocalLog('warning', '📱 Pronto para monitorar mensagens ivangeli_ → wesley_costa322');
-            
-            // Iniciar monitoramento automático
-            setTimeout(startMonitoring, 1000);
+            addLog('info', '🔬 Teste final definitivo carregado');
+            addLog('error', '🚨 Mensagem não subiu - investigando...');
         });
 
         // Cleanup
