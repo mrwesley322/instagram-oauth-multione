@@ -269,10 +269,10 @@
                 </div>
                 
                 <div class="token-info" id="user-token-info">
-                    <strong>📝 Token:</strong> EAAPHxlZBqFZAQBPOegCG3JPsfRtOXBiVfZ...<br>
-                    <strong>👤 Usuário:</strong> Wesley Costa (24005094685843552)<br>
-                    <strong>✅ Status:</strong> Funcionando para /me<br>
-                    <strong>❌ Problema:</strong> Não funciona para webhook (erro 210)
+                    <strong>📝 Token:</strong> EAAPHxlZBqFZAQBPCNrYaHE085SIXDaIFYKILCQ6tHDU...<br>
+                    <strong>👤 Usuário:</strong> Wesley Costa<br>
+                    <strong>✅ Status:</strong> NOVO TOKEN FUNCIONANDO<br>
+                    <strong>🔄 Ação:</strong> Obter Page Token e reconfigurar webhook
                 </div>
                 
                 <button class="btn" onclick="testUserToken()" style="width: 100%;">
@@ -307,18 +307,18 @@
 
         <!-- Logs do Sistema -->
         <div class="logs-container" id="logs-container">
-            <div class="log-entry log-warning">
-                <span>[ERRO 210]</span> "A page access token is required to request this resource" - Precisamos converter User Token para Page Token.
+            <div class="log-entry log-success">
+                <span>[TOKEN NOVO]</span> Token atualizado e funcionando: EAAPHxlZBqFZAQBPCNrYaHE085SIXDaIFYKILCQ6tHDU...
             </div>
             <div class="log-entry log-info">
-                <span>[SOLUÇÃO]</span> Vamos usar o User Token para obter Page Tokens das páginas vinculadas.
+                <span>[AÇÃO]</span> Clique em "Converter" para obter o Page Token do novo User Token.
             </div>
         </div>
     </div>
 
     <script>
-        // User Token que funciona
-        const USER_TOKEN = 'EAAPHxlZBqFZAQBPOegCG3JPsfRtOXBiVfZCFjdWTG0hAzSyTuraQnDDKr1SiMiupySwxgNZAJLVEgxqq0DhnuNoOt10bUYpZBthKBkfZBbXa4CnNyoamsiOZAaPk1iq1ZC9lZChOOZCmKFjK0f769cijzMVjSSP23DO7wU6TMM4yrm2sK7LAhh47lnSexvbAhbUuz7ZAx2LZAtJtWbzjxZC9ZCPmgBY9ieLjHRUhCIUIGoKJwKdfzz3l0yTXas';
+        // User Token que funciona (ATUALIZADO)
+        const USER_TOKEN = 'EAAPHxlZBqFZAQBPCNrYaHE085SIXDaIFYKILCQ6tHDU43rJLSKEQZAqtRpCCbV6vx2zwshSz54XZADKHZCGzEhhW8vZBpQShqI5aUZCCt03ZBjIjXco7m8UnpojOqKERMXDvVM0WlzN5Jvdv74XGa3Jce5SucR9IK2ABkRup47qvOxull5vJtZAAwCyiAFmlZADH5BLGuZBeH5FFQzaCPIYGwP4BN67ZC7DNO0XlhZB1pyk2kkIpBbBZB4CcPkegZDZD';
         
         let userPages = [];
         let selectedPageToken = null;
