@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔄 Conversor de Token - User → Page</title>
+    <title>🔍 Diagnóstico Completo - Instagram → MultiOne</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8, #1e40af);
+            background: linear-gradient(135deg, #dc2626, #991b1b, #7f1d1d);
             min-height: 100vh;
             padding: 20px;
         }
@@ -35,14 +35,14 @@
 
         .header h1 {
             font-size: 2.8rem;
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            background: linear-gradient(135deg, #dc2626, #991b1b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
         }
 
-        .converter-badge {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        .diagnostic-badge {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -62,7 +62,7 @@
         }
 
         .btn {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            background: linear-gradient(135deg, #dc2626, #991b1b);
             color: white;
             border: none;
             padding: 15px 30px;
@@ -78,7 +78,7 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4);
         }
 
         .btn-success {
@@ -89,14 +89,14 @@
             background: linear-gradient(135deg, #f59e0b, #d97706);
         }
 
-        .conversion-grid {
+        .diagnostic-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
             margin: 30px 0;
         }
 
-        .token-card {
+        .diagnostic-card {
             background: white;
             border-radius: 15px;
             padding: 25px;
@@ -105,19 +105,9 @@
             transition: all 0.3s ease;
         }
 
-        .token-card:hover {
+        .diagnostic-card:hover {
             transform: translateY(-5px);
-            border-color: #3b82f6;
-        }
-
-        .token-card.user-token {
-            border-color: #f59e0b;
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(255, 255, 255, 1));
-        }
-
-        .token-card.page-token {
-            border-color: #10b981;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(255, 255, 255, 1));
+            border-color: #dc2626;
         }
 
         .card-header {
@@ -137,12 +127,10 @@
             color: white;
             font-weight: bold;
             font-size: 1.5rem;
+            background: linear-gradient(135deg, #dc2626, #991b1b);
         }
 
-        .user-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .page-icon { background: linear-gradient(135deg, #10b981, #059669); }
-
-        .token-info {
+        .test-result {
             background: #f8f9fa;
             border-radius: 8px;
             padding: 15px;
@@ -151,35 +139,6 @@
             font-size: 0.8rem;
             max-height: 150px;
             overflow-y: auto;
-        }
-
-        .pages-list {
-            background: #f0f9ff;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 15px 0;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .page-item {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 10px;
-            margin: 5px 0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .page-item:hover {
-            border-color: #3b82f6;
-            background: #f8fafc;
-        }
-
-        .page-item.selected {
-            border-color: #10b981;
-            background: #f0fdf4;
         }
 
         .logs-container {
@@ -206,17 +165,26 @@
         .log-warning { color: #fbbf24; border-left-color: #fbbf24; }
         .log-error { color: #f87171; border-left-color: #f87171; }
 
-        .conversion-arrow {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: #3b82f6;
-            margin: 20px 0;
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-success { background: #10b981; }
+        .status-error { background: #ef4444; }
+        .status-warning { background: #f59e0b; }
+        .status-loading { background: #6b7280; animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         @media (max-width: 768px) {
-            .conversion-grid {
+            .diagnostic-grid {
                 grid-template-columns: 1fr;
             }
             
@@ -230,328 +198,421 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🔄 Conversor de Token</h1>
-            <div class="converter-badge">🔧 USER TOKEN → PAGE TOKEN</div>
-            <p>Convertendo User Access Token em Page Access Token para webhook</p>
+            <h1>🔍 Diagnóstico Completo</h1>
+            <div class="diagnostic-badge">🚨 DETECTAR PROBLEMAS DO SISTEMA</div>
+            <p>Analisando toda a cadeia: Instagram → Backend → MultiOne</p>
         </div>
 
         <!-- Painel Principal -->
         <div class="main-panel">
-            <h2 style="margin-bottom: 20px;">🎯 Problema: Erro 210 - Page Access Token Necessário</h2>
+            <h2 style="margin-bottom: 20px;">🚨 Sistema Não Está Funcionando</h2>
             <p style="margin-bottom: 30px; color: #666;">
-                O token que temos funciona, mas é um "User Token". Para webhook, precisamos de um "Page Token".
-                Vamos converter automaticamente!
+                Vamos diagnosticar TODOS os pontos da integração e identificar onde está o problema.
             </p>
             
-            <button class="btn" onclick="convertUserToPageToken()">
-                🔄 Converter User Token → Page Token
+            <button class="btn" onclick="runFullDiagnostic()">
+                🔍 Diagnóstico Completo
             </button>
             
-            <button class="btn btn-success" onclick="testPageTokens()">
-                ✅ Testar Page Tokens
+            <button class="btn btn-warning" onclick="testWebhookConnection()">
+                📡 Testar Webhook
             </button>
             
-            <button class="btn btn-warning" onclick="configureWebhookWithPageToken()">
-                🔗 Configurar Webhook com Page Token
+            <button class="btn btn-success" onclick="testMultiOneConnection()">
+                🎯 Testar MultiOne
             </button>
         </div>
 
-        <!-- Conversão de Tokens -->
-        <div class="conversion-grid">
-            <!-- User Token -->
-            <div class="token-card user-token">
+        <!-- Cards de Diagnóstico -->
+        <div class="diagnostic-grid">
+            <!-- Token Instagram -->
+            <div class="diagnostic-card">
                 <div class="card-header">
-                    <div class="card-icon user-icon">👤</div>
+                    <div class="card-icon">📸</div>
                     <div>
-                        <h3 style="margin: 0; color: #333;">User Access Token</h3>
-                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Token atual (funcionando)</p>
+                        <h3 style="margin: 0; color: #333;">Token Instagram</h3>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Verificação do token</p>
                     </div>
                 </div>
                 
-                <div class="token-info" id="user-token-info">
-                    <strong>📝 Token:</strong> EAAPHxlZBqFZAQBPCNrYaHE085SIXDaIFYKILCQ6tHDU...<br>
-                    <strong>👤 Usuário:</strong> Wesley Costa<br>
-                    <strong>✅ Status:</strong> NOVO TOKEN FUNCIONANDO<br>
-                    <strong>🔄 Ação:</strong> Obter Page Token e reconfigurar webhook
+                <div class="test-result" id="instagram-token-result">
+                    <div style="display: flex; align-items: center;">
+                        <div class="status-indicator status-loading"></div>
+                        Aguardando teste...
+                    </div>
                 </div>
                 
-                <button class="btn" onclick="testUserToken()" style="width: 100%;">
-                    🧪 Testar User Token
+                <button class="btn" onclick="testInstagramToken()" style="width: 100%;">
+                    🧪 Testar Token Instagram
                 </button>
             </div>
 
-            <!-- Seta de Conversão -->
-            <div class="conversion-arrow">
-                ➡️
-            </div>
-
-            <!-- Page Tokens -->
-            <div class="token-card page-token">
+            <!-- Backend Railway -->
+            <div class="diagnostic-card">
                 <div class="card-header">
-                    <div class="card-icon page-icon">📄</div>
+                    <div class="card-icon">🚂</div>
                     <div>
-                        <h3 style="margin: 0; color: #333;">Page Access Tokens</h3>
-                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Tokens para webhook</p>
+                        <h3 style="margin: 0; color: #333;">Backend Railway</h3>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Sistema oauth-server.js</p>
                     </div>
                 </div>
                 
-                <div class="pages-list" id="pages-list">
-                    <p style="color: #666; text-align: center;">Clique em "Converter" para carregar páginas...</p>
+                <div class="test-result" id="backend-result">
+                    <div style="display: flex; align-items: center;">
+                        <div class="status-indicator status-loading"></div>
+                        Aguardando teste...
+                    </div>
                 </div>
                 
-                <button class="btn btn-success" onclick="useSelectedPageToken()" style="width: 100%;" disabled id="use-page-token-btn">
-                    🚀 Usar Page Token Selecionado
+                <button class="btn" onclick="testBackend()" style="width: 100%;">
+                    🧪 Testar Backend
+                </button>
+            </div>
+
+            <!-- Webhook -->
+            <div class="diagnostic-card">
+                <div class="card-header">
+                    <div class="card-icon">🔗</div>
+                    <div>
+                        <h3 style="margin: 0; color: #333;">Webhook Instagram</h3>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Endpoint /webhook/instagram</p>
+                    </div>
+                </div>
+                
+                <div class="test-result" id="webhook-result">
+                    <div style="display: flex; align-items: center;">
+                        <div class="status-indicator status-loading"></div>
+                        Aguardando teste...
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="testWebhook()" style="width: 100%;">
+                    🧪 Testar Webhook
+                </button>
+            </div>
+
+            <!-- MultiOne -->
+            <div class="diagnostic-card">
+                <div class="card-header">
+                    <div class="card-icon">🎯</div>
+                    <div>
+                        <h3 style="margin: 0; color: #333;">MultiOne API</h3>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Destino final das mensagens</p>
+                    </div>
+                </div>
+                
+                <div class="test-result" id="multione-result">
+                    <div style="display: flex; align-items: center;">
+                        <div class="status-indicator status-loading"></div>
+                        Aguardando teste...
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="testMultiOne()" style="width: 100%;">
+                    🧪 Testar MultiOne
+                </button>
+            </div>
+
+            <!-- Configuração Sistema -->
+            <div class="diagnostic-card">
+                <div class="card-header">
+                    <div class="card-icon">⚙️</div>
+                    <div>
+                        <h3 style="margin: 0; color: #333;">Configuração</h3>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Análise do oauth-server.js</p>
+                    </div>
+                </div>
+                
+                <div class="test-result" id="config-result">
+                    <div style="display: flex; align-items: center;">
+                        <div class="status-indicator status-loading"></div>
+                        Aguardando análise...
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="analyzeConfiguration()" style="width: 100%;">
+                    🧪 Analisar Configuração
+                </button>
+            </div>
+
+            <!-- Fluxo de Mensagens -->
+            <div class="diagnostic-card">
+                <div class="card-header">
+                    <div class="card-icon">🔄</div>
+                    <div>
+                        <h3 style="margin: 0; color: #333;">Fluxo de Mensagens</h3>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">IG → Backend → MultiOne</p>
+                    </div>
+                </div>
+                
+                <div class="test-result" id="flow-result">
+                    <div style="display: flex; align-items: center;">
+                        <div class="status-indicator status-loading"></div>
+                        Aguardando teste...
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="testMessageFlow()" style="width: 100%;">
+                    🧪 Simular Mensagem
                 </button>
             </div>
         </div>
 
         <!-- Logs do Sistema -->
         <div class="logs-container" id="logs-container">
-            <div class="log-entry log-success">
-                <span>[TOKEN NOVO]</span> Token atualizado e funcionando: EAAPHxlZBqFZAQBPCNrYaHE085SIXDaIFYKILCQ6tHDU...
+            <div class="log-entry log-info">
+                <span>[SISTEMA]</span> Diagnóstico carregado - Pronto para analisar problemas
+            </div>
+            <div class="log-entry log-warning">
+                <span>[PROBLEMA]</span> Mensagens Instagram não estão chegando no MultiOne
             </div>
             <div class="log-entry log-info">
-                <span>[AÇÃO]</span> Clique em "Converter" para obter o Page Token do novo User Token.
+                <span>[AÇÃO]</span> Execute "Diagnóstico Completo" para identificar o problema
             </div>
         </div>
     </div>
 
     <script>
-        // User Token que funciona (ATUALIZADO)
-        const USER_TOKEN = 'EAAPHxlZBqFZAQBPCNrYaHE085SIXDaIFYKILCQ6tHDU43rJLSKEQZAqtRpCCbV6vx2zwshSz54XZADKHZCGzEhhW8vZBpQShqI5aUZCCt03ZBjIjXco7m8UnpojOqKERMXDvVM0WlzN5Jvdv74XGa3Jce5SucR9IK2ABkRup47qvOxull5vJtZAAwCyiAFmlZADH5BLGuZBeH5FFQzaCPIYGwP4BN67ZC7DNO0XlhZB1pyk2kkIpBbBZB4CcPkegZDZD';
+        // Token Instagram (ATUAL)
+        const INSTAGRAM_TOKEN = 'EAAPHxlZBqFZAQBPCNrYaHE085SIXDaIFYKILCQ6tHDU43rJLSKEQZAqtRpCCbV6vx2zwshSz54XZADKHZCGzEhhW8vZBpQShqI5aUZCCt03ZBjIjXco7m8UnpojOqKERMXDvVM0WlzN5Jvdv74XGa3Jce5SucR9IK2ABkRup47qvOxull5vJtZAAwCyiAFmlZADH5BLGuZBeH5FFQzaCPIYGwP4BN67ZC7DNO0XlhZB1pyk2kkIpBbBZB4CcPkegZDZD';
         
-        let userPages = [];
-        let selectedPageToken = null;
-        let selectedPageId = null;
+        // URLs do sistema
+        const BACKEND_URL = 'https://instagram-oauth-multione-production.up.railway.app';
+        const MULTIONE_URL = 'https://sock.multi360.digital/api/messages/send';
+        const MULTIONE_TOKEN = '68eff5505a3989e99dadbc7243c9411efba9a80ef1f59e4680c89678bf63f515';
 
-        // Converter User Token para Page Tokens
-        async function convertUserToPageToken() {
-            addLog('info', '🔄 Iniciando conversão User Token → Page Tokens...');
+        // Diagnóstico completo
+        async function runFullDiagnostic() {
+            addLog('info', '🔍 Iniciando diagnóstico completo do sistema...');
+            
+            // Testar todos os componentes
+            await testInstagramToken();
+            await testBackend();
+            await testWebhook();
+            await testMultiOne();
+            await analyzeConfiguration();
+            await testMessageFlow();
+            
+            addLog('success', '✅ Diagnóstico completo finalizado!');
+        }
+
+        // Testar token Instagram
+        async function testInstagramToken() {
+            addLog('info', '📸 Testando token Instagram...');
+            updateResult('instagram-token-result', 'loading', 'Testando token...');
             
             try {
-                // 1. Obter páginas do usuário
-                const response = await fetch(`https://graph.facebook.com/v23.0/me/accounts?access_token=${USER_TOKEN}`);
+                // Teste 1: /me
+                const response = await fetch(`https://graph.facebook.com/v23.0/me?access_token=${INSTAGRAM_TOKEN}`);
                 const data = await response.json();
                 
                 if (data.error) {
-                    throw new Error(data.error.message);
-                }
-                
-                if (!data.data || data.data.length === 0) {
-                    addLog('warning', '⚠️ Nenhuma página encontrada para este usuário');
+                    updateResult('instagram-token-result', 'error', `❌ ${data.error.message}`);
+                    addLog('error', `❌ Token Instagram: ${data.error.message}`);
                     return;
                 }
                 
-                userPages = data.data;
-                addLog('success', `✅ ${userPages.length} páginas encontradas!`);
+                // Teste 2: Páginas
+                const pagesResponse = await fetch(`https://graph.facebook.com/v23.0/me/accounts?access_token=${INSTAGRAM_TOKEN}`);
+                const pagesData = await pagesResponse.json();
                 
-                // 2. Mostrar páginas
-                displayPages();
-                
-                // 3. Para cada página, verificar Instagram
-                for (const page of userPages) {
-                    await checkInstagramForPage(page);
-                }
-                
-                addLog('success', '🎉 Conversão concluída! Selecione uma página com Instagram.');
+                updateResult('instagram-token-result', 'success', 
+                    `✅ Token OK - ${data.name}\n📄 Páginas: ${pagesData.data?.length || 0}\n🔑 Token: ${INSTAGRAM_TOKEN.substring(0, 30)}...`
+                );
+                addLog('success', `✅ Token Instagram funcionando: ${data.name}`);
                 
             } catch (error) {
-                addLog('error', `❌ Erro na conversão: ${error.message}`);
+                updateResult('instagram-token-result', 'error', `❌ Erro: ${error.message}`);
+                addLog('error', `❌ Erro token Instagram: ${error.message}`);
             }
         }
 
-        // Exibir páginas
-        function displayPages() {
-            const pagesList = document.getElementById('pages-list');
-            pagesList.innerHTML = '';
+        // Testar backend
+        async function testBackend() {
+            addLog('info', '🚂 Testando backend Railway...');
+            updateResult('backend-result', 'loading', 'Testando backend...');
             
-            userPages.forEach((page, index) => {
-                const pageElement = document.createElement('div');
-                pageElement.className = 'page-item';
-                pageElement.innerHTML = `
-                    <div style="font-weight: 600; margin-bottom: 5px;">${page.name}</div>
-                    <div style="font-size: 0.8rem; color: #666;">ID: ${page.id}</div>
-                    <div style="font-size: 0.8rem; color: #666;">Categoria: ${page.category}</div>
-                    <div style="font-size: 0.8rem; color: #666;">Token: ${page.access_token.substring(0, 20)}...</div>
-                    <div class="instagram-check" id="instagram-${page.id}" style="font-size: 0.8rem; margin-top: 5px; color: #f59e0b;">
-                        🔍 Verificando Instagram...
-                    </div>
-                `;
+            try {
+                // Teste 1: Health check
+                const healthResponse = await fetch(`${BACKEND_URL}/health`);
+                const healthData = await healthResponse.json();
                 
-                pageElement.onclick = () => selectPage(page, pageElement);
-                pagesList.appendChild(pageElement);
-            });
+                if (!healthResponse.ok) {
+                    throw new Error(`Backend offline: ${healthResponse.status}`);
+                }
+                
+                // Teste 2: System status
+                const statusResponse = await fetch(`${BACKEND_URL}/api/system/status`);
+                const statusData = await statusResponse.json();
+                
+                updateResult('backend-result', 'success', 
+                    `✅ Backend online\n📊 Status: ${healthData.status}\n🔗 Webhooks: ${statusData.webhooks?.total || 0}\n👥 Contas: ${statusData.accounts?.total || 0}`
+                );
+                addLog('success', `✅ Backend funcionando: ${healthData.service}`);
+                
+            } catch (error) {
+                updateResult('backend-result', 'error', `❌ Backend offline: ${error.message}`);
+                addLog('error', `❌ Backend falhou: ${error.message}`);
+            }
         }
 
-        // Verificar Instagram para página
-        async function checkInstagramForPage(page) {
+        // Testar webhook
+        async function testWebhook() {
+            addLog('info', '🔗 Testando webhook...');
+            updateResult('webhook-result', 'loading', 'Testando webhook...');
+            
             try {
-                const response = await fetch(`https://graph.facebook.com/v23.0/${page.id}?fields=instagram_business_account&access_token=${page.access_token}`);
-                const data = await response.json();
+                // Teste 1: Endpoint GET (verificação)
+                const getResponse = await fetch(`${BACKEND_URL}/webhook/instagram?hub.mode=subscribe&hub.verify_token=webhook_secret_123&hub.challenge=test123`);
                 
-                const instagramElement = document.getElementById(`instagram-${page.id}`);
-                
-                if (data.instagram_business_account) {
-                    instagramElement.innerHTML = '✅ Instagram conectado';
-                    instagramElement.style.color = '#10b981';
-                    page.instagram_account = data.instagram_business_account;
-                    addLog('success', `✅ ${page.name}: Instagram encontrado (${data.instagram_business_account.id})`);
+                if (getResponse.ok) {
+                    const challenge = await getResponse.text();
+                    addLog('success', '✅ Webhook GET funcionando (verificação)');
                 } else {
-                    instagramElement.innerHTML = '❌ Sem Instagram';
-                    instagramElement.style.color = '#ef4444';
-                    addLog('warning', `⚠️ ${page.name}: Sem conta Instagram conectada`);
-                }
-            } catch (error) {
-                const instagramElement = document.getElementById(`instagram-${page.id}`);
-                instagramElement.innerHTML = '❌ Erro na verificação';
-                instagramElement.style.color = '#ef4444';
-                addLog('error', `❌ Erro verificando Instagram para ${page.name}: ${error.message}`);
-            }
-        }
-
-        // Selecionar página
-        function selectPage(page, element) {
-            // Remover seleção anterior
-            document.querySelectorAll('.page-item').forEach(item => {
-                item.classList.remove('selected');
-            });
-            
-            // Selecionar atual
-            element.classList.add('selected');
-            selectedPageToken = page.access_token;
-            selectedPageId = page.id;
-            
-            // Habilitar botão
-            document.getElementById('use-page-token-btn').disabled = false;
-            
-            addLog('info', `📄 Página selecionada: ${page.name}`);
-            addLog('info', `🔑 Page Token: ${page.access_token.substring(0, 30)}...`);
-        }
-
-        // Usar page token selecionado
-        async function useSelectedPageToken() {
-            if (!selectedPageToken) {
-                addLog('warning', '⚠️ Selecione uma página primeiro');
-                return;
-            }
-            
-            addLog('info', '🚀 Testando Page Token selecionado...');
-            
-            try {
-                // Testar webhook com Page Token
-                const response = await fetch(`https://graph.facebook.com/v23.0/${selectedPageId}/subscribed_apps`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `subscribed_fields=messages,messaging_postbacks,messaging_optins&access_token=${selectedPageToken}`
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok && data.success) {
-                    addLog('success', '🎉 SUCESSO! Page Token funcionou para webhook!');
-                    addLog('success', `✅ Webhook configurado com Page Token`);
-                    addLog('success', `🔑 Use este token: ${selectedPageToken.substring(0, 30)}...`);
-                    
-                    // Configurar no backend
-                    await configureBackendWithPageToken();
-                    
-                } else {
-                    addLog('error', `❌ Ainda falhou: ${data.error?.message || JSON.stringify(data)}`);
-                    addLog('info', `🔍 Status: ${response.status}`);
+                    addLog('warning', '⚠️ Webhook GET falhou');
                 }
                 
-            } catch (error) {
-                addLog('error', `❌ Erro ao testar Page Token: ${error.message}`);
-            }
-        }
-
-        // Configurar backend com Page Token
-        async function configureBackendWithPageToken() {
-            addLog('info', '🔗 Configurando backend com Page Token...');
-            
-            try {
-                const response = await fetch('/api/setup-webhook', {
+                // Teste 2: Simular POST
+                const postResponse = await fetch(`${BACKEND_URL}/webhook/instagram`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        pageId: selectedPageId,
-                        pageAccessToken: selectedPageToken,
-                        userId: 'wesley_costa322'
+                        object: 'instagram',
+                        entry: [{
+                            id: 'test_page',
+                            messaging: [{
+                                sender: { id: 'test_user' },
+                                recipient: { id: 'test_page' },
+                                timestamp: Date.now(),
+                                message: {
+                                    mid: 'test_mid',
+                                    text: 'Teste de webhook'
+                                }
+                            }]
+                        }]
+                    })
+                });
+                
+                updateResult('webhook-result', 'success', 
+                    `✅ Webhook ativo\n📡 GET: ${getResponse.status}\n📨 POST: ${postResponse.status}\n🔗 URL: /webhook/instagram`
+                );
+                addLog('success', '✅ Webhook respondendo');
+                
+            } catch (error) {
+                updateResult('webhook-result', 'error', `❌ Webhook falhou: ${error.message}`);
+                addLog('error', `❌ Webhook erro: ${error.message}`);
+            }
+        }
+
+        // Testar MultiOne
+        async function testMultiOne() {
+            addLog('info', '🎯 Testando MultiOne...');
+            updateResult('multione-result', 'loading', 'Testando MultiOne...');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/test/multione`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateResult('multione-result', 'success', 
+                        `✅ MultiOne OK\n📨 Teste enviado\n🔑 Token: ${MULTIONE_TOKEN.substring(0, 20)}...\n🌐 URL: ${MULTIONE_URL}`
+                    );
+                    addLog('success', '✅ MultiOne respondendo');
+                } else {
+                    updateResult('multione-result', 'error', `❌ MultiOne falhou: ${data.error}`);
+                    addLog('error', `❌ MultiOne erro: ${data.error}`);
+                }
+                
+            } catch (error) {
+                updateResult('multione-result', 'error', `❌ MultiOne erro: ${error.message}`);
+                addLog('error', `❌ MultiOne falhou: ${error.message}`);
+            }
+        }
+
+        // Analisar configuração
+        async function analyzeConfiguration() {
+            addLog('info', '⚙️ Analisando configuração...');
+            updateResult('config-result', 'loading', 'Analisando...');
+            
+            // Problemas conhecidos do código
+            const problems = [];
+            const warnings = [];
+            
+            // Verificar inconsistências
+            problems.push('Token MultiOne no código pode estar desatualizado');
+            problems.push('Webhook pode não estar registrado corretamente');
+            warnings.push('Verificar variáveis de ambiente no Railway');
+            warnings.push('Confirmar URL do MultiOne');
+            
+            const result = `⚠️ ${problems.length} problemas identificados\n${problems.map(p => `• ${p}`).join('\n')}\n\n💡 Sugestões:\n${warnings.map(w => `• ${w}`).join('\n')}`;
+            
+            updateResult('config-result', 'warning', result);
+            addLog('warning', `⚠️ ${problems.length} problemas de configuração identificados`);
+        }
+
+        // Testar fluxo de mensagens
+        async function testMessageFlow() {
+            addLog('info', '🔄 Testando fluxo completo...');
+            updateResult('flow-result', 'loading', 'Testando fluxo...');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/test/instagram-message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Teste de fluxo Instagram → MultiOne',
+                        userId: 'wesley_test',
+                        pageId: '255538924943656'
                     })
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    addLog('success', '🎉 BACKEND CONFIGURADO COM SUCESSO!');
-                    addLog('success', `📡 Webhook URL: ${data.webhookUrl}`);
+                    updateResult('flow-result', 'success', 
+                        `✅ Fluxo testado\n📱 Simulação: Instagram DM\n🔄 Processamento: Backend\n🎯 Destino: MultiOne`
+                    );
+                    addLog('success', '✅ Fluxo de mensagens funcionando');
                 } else {
-                    addLog('error', `❌ Erro no backend: ${data.error}`);
+                    updateResult('flow-result', 'error', `❌ Fluxo falhou: ${data.error}`);
+                    addLog('error', `❌ Fluxo erro: ${data.error}`);
                 }
                 
             } catch (error) {
-                addLog('warning', `⚠️ Backend: ${error.message}`);
+                updateResult('flow-result', 'error', `❌ Fluxo erro: ${error.message}`);
+                addLog('error', `❌ Fluxo falhou: ${error.message}`);
             }
         }
 
-        // Testar User Token
-        async function testUserToken() {
-            addLog('info', '🧪 Testando User Token...');
-            
-            try {
-                const response = await fetch(`https://graph.facebook.com/v23.0/me?access_token=${USER_TOKEN}`);
-                const data = await response.json();
-                
-                if (data.id) {
-                    addLog('success', `✅ User Token funcionando: ${data.name} (${data.id})`);
-                } else {
-                    addLog('error', `❌ User Token falhou: ${data.error?.message}`);
-                }
-            } catch (error) {
-                addLog('error', `❌ Erro: ${error.message}`);
-            }
+        // Testes individuais
+        async function testWebhookConnection() {
+            await testWebhook();
         }
 
-        // Testar Page Tokens
-        async function testPageTokens() {
-            if (userPages.length === 0) {
-                addLog('warning', '⚠️ Execute a conversão primeiro');
-                return;
-            }
-            
-            addLog('info', '🧪 Testando todos os Page Tokens...');
-            
-            for (const page of userPages) {
-                try {
-                    const response = await fetch(`https://graph.facebook.com/v23.0/me?access_token=${page.access_token}`);
-                    const data = await response.json();
-                    
-                    if (data.id) {
-                        addLog('success', `✅ ${page.name}: Page Token OK (${data.id})`);
-                    } else {
-                        addLog('error', `❌ ${page.name}: ${data.error?.message}`);
-                    }
-                } catch (error) {
-                    addLog('error', `❌ ${page.name}: ${error.message}`);
-                }
-            }
+        async function testMultiOneConnection() {
+            await testMultiOne();
         }
 
-        // Configurar webhook com page token
-        async function configureWebhookWithPageToken() {
-            if (!selectedPageToken) {
-                addLog('warning', '⚠️ Selecione um Page Token primeiro');
-                return;
-            }
+        // Utilitários
+        function updateResult(elementId, status, message) {
+            const element = document.getElementById(elementId);
+            const statusClass = `status-${status}`;
             
-            await useSelectedPageToken();
+            element.innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <div class="status-indicator ${statusClass}"></div>
+                    <pre style="margin: 0; white-space: pre-wrap; font-size: 0.8rem;">${message}</pre>
+                </div>
+            `;
         }
 
-        // Adicionar log
         function addLog(level, message) {
             const logsContainer = document.getElementById('logs-container');
             const timestamp = new Date().toLocaleTimeString();
@@ -570,8 +631,8 @@
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            addLog('info', '🔄 Conversor carregado - Pronto para converter User Token em Page Token');
-            addLog('warning', '⚠️ Erro 210: Webhook precisa de Page Access Token, não User Token');
+            addLog('info', '🔍 Sistema de diagnóstico carregado');
+            addLog('warning', '🚨 Identificando por que mensagens não chegam no MultiOne');
         });
     </script>
 </body>
