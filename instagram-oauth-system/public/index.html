@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎯 Teste Final - Token com Permissões</title>
+    <title>🔍 Teste Webhook Manual</title>
     <style>
         * {
             margin: 0;
@@ -13,13 +13,13 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #10b981, #059669, #047857);
+            background: linear-gradient(135deg, #ef4444, #dc2626, #991b1b);
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
@@ -35,14 +35,14 @@
 
         .header h1 {
             font-size: 2.5rem;
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
         }
 
-        .success-badge {
-            background: linear-gradient(135deg, #10b981, #059669);
+        .urgent-badge {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -52,64 +52,63 @@
             margin: 5px;
         }
 
-        .final-test {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(255, 255, 255, 1));
-            border: 2px solid #10b981;
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .test-card {
+            background: white;
             border-radius: 15px;
-            padding: 25px;
-            margin: 20px 0;
-            text-align: center;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid #e5e7eb;
+        }
+
+        .test-card.critical {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(255, 255, 255, 1));
         }
 
         .btn {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
+            padding: 12px 20px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 1.2rem;
-            margin: 15px;
-            min-width: 250px;
+            width: 100%;
+            margin: 10px 0;
+            font-size: 1rem;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
         }
 
         .btn-warning {
             background: linear-gradient(135deg, #f59e0b, #d97706);
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-        }
-
         .result-box {
             background: #f8f9fa;
             border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            border-left: 4px solid #10b981;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .token-info {
-            background: #ecfdf5;
-            border: 1px solid #10b981;
-            border-radius: 8px;
             padding: 15px;
-            margin: 15px 0;
+            margin: 10px 0;
             font-family: 'Courier New', monospace;
             font-size: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
+            border-left: 4px solid #ef4444;
         }
 
         .logs-container {
@@ -119,7 +118,7 @@
             padding: 20px;
             font-family: 'Courier New', monospace;
             font-size: 0.9rem;
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
             margin: 20px 0;
         }
@@ -134,38 +133,20 @@
         .log-warning { color: #fbbf24; }
         .log-error { color: #f87171; }
 
-        .status-steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .step-box {
-            background: white;
-            border-radius: 10px;
+        .webhook-config {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
             padding: 15px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border: 2px solid #e5e7eb;
+            margin: 15px 0;
         }
 
-        .step-box.success {
-            border-color: #10b981;
-            background: #f0fdf4;
-        }
-
-        .step-number {
-            display: inline-block;
-            background: #10b981;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 30px;
-            font-weight: bold;
-            margin-bottom: 10px;
+        .solution-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(255, 255, 255, 1));
+            border: 2px solid #10b981;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -173,338 +154,381 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🎯 Teste Final</h1>
-            <div class="success-badge">🔑 NOVO TOKEN</div>
-            <div class="success-badge">✅ PERMISSÕES ATIVAS</div>
-            <div class="success-badge">📱 INSTAGRAM CONECTADO</div>
-            <p>Token atualizado com todas as permissões necessárias</p>
+            <h1>🔍 Teste Webhook Manual</h1>
+            <div class="urgent-badge">🚨 DIAGNÓSTICO FINAL</div>
+            <div class="urgent-badge">📡 WEBHOOK NÃO FUNCIONA</div>
+            <p>Page Subscription ativa, mas mensagens não chegam - vamos resolver!</p>
         </div>
 
-        <!-- Token Info -->
-        <div class="token-info">
-            <strong>🔑 Novo Token:</strong><br>
-            EAAPHxlZBqFZAQBPCUMlAy4d8ucJ0LZB1l7JFJap9S6weioKntsZCEADCMSzqRxP60CGxo1ZBH0u1ZBFSjhiryJbBMWKIiYrnzufp9EtiywmoSk24ZBsdK17ePX1RBdHjBfYi6snqMGWnihrVHEWCW7E5qJ09hYhuhhjWUTZCOw54whUm2y1OD1vzQPXnGnxifKGPNkxhn1KrQjxF9ZBKpeUQ2Vs3ssw6wBvALsPeLNGd3AixxOfxocApY<br><br>
-            <strong>✅ Permissões Ativas:</strong><br>
-            • Mensagens e ligações ✅<br>
-            • Conteúdo ✅<br>
-            • Atividade da comunidade ✅<br>
-            • Insights ✅<br>
-            • Acesso parcial (Facebook e ferramentas) ✅
+        <!-- Testes Críticos -->
+        <div class="test-grid">
+            <!-- Teste 1: Webhook Meta Developer -->
+            <div class="test-card critical">
+                <h3 style="color: #ef4444; margin-bottom: 15px;">1. 🔧 Webhook Meta Developer</h3>
+                <p style="margin-bottom: 15px; font-size: 0.9rem;">
+                    Verificar se o webhook está registrado no Meta Developer Dashboard
+                </p>
+                
+                <div class="webhook-config">
+                    <strong>📡 URL esperada:</strong><br>
+                    https://instagram-oauth-multione-production.up.railway.app/webhook/instagram<br><br>
+                    <strong>🔑 Verify Token:</strong> webhook_secret_123<br>
+                    <strong>📋 Campos:</strong> messages, messaging_postbacks, messaging_optins
+                </div>
+                
+                <button class="btn" onclick="window.open('https://developers.facebook.com/apps/1064079752566164/webhooks/', '_blank')">
+                    🔧 Verificar Meta Developer
+                </button>
+                
+                <div class="result-box" id="webhook-meta-result" style="display: none;">
+                    Aguardando verificação...
+                </div>
+            </div>
+
+            <!-- Teste 2: Endpoint Webhook -->
+            <div class="test-card critical">
+                <h3 style="color: #ef4444; margin-bottom: 15px;">2. 📡 Endpoint Webhook</h3>
+                <p style="margin-bottom: 15px; font-size: 0.9rem;">
+                    Testar se o endpoint está respondendo
+                </p>
+                
+                <button class="btn" onclick="testWebhookEndpoint()">
+                    📡 Testar Endpoint
+                </button>
+                
+                <div class="result-box" id="endpoint-result" style="display: none;">
+                    Aguardando teste...
+                </div>
+            </div>
+
+            <!-- Teste 3: Logs Backend -->
+            <div class="test-card critical">
+                <h3 style="color: #ef4444; margin-bottom: 15px;">3. 📋 Logs Backend</h3>
+                <p style="margin-bottom: 15px; font-size: 0.9rem;">
+                    Verificar se mensagens chegam no backend
+                </p>
+                
+                <button class="btn" onclick="checkBackendLogs()">
+                    📋 Verificar Logs
+                </button>
+                
+                <div class="result-box" id="logs-result" style="display: none;">
+                    Aguardando verificação...
+                </div>
+            </div>
+
+            <!-- Teste 4: Simular Webhook -->
+            <div class="test-card">
+                <h3 style="margin-bottom: 15px;">4. 🧪 Simular Webhook</h3>
+                <p style="margin-bottom: 15px; font-size: 0.9rem;">
+                    Enviar webhook manual para testar fluxo
+                </p>
+                
+                <button class="btn btn-warning" onclick="simulateWebhook()">
+                    🧪 Simular Webhook
+                </button>
+                
+                <div class="result-box" id="simulate-result" style="display: none;">
+                    Aguardando simulação...
+                </div>
+            </div>
+
+            <!-- Teste 5: MultiOne Direto -->
+            <div class="test-card">
+                <h3 style="margin-bottom: 15px;">5. 🎯 Teste MultiOne</h3>
+                <p style="margin-bottom: 15px; font-size: 0.9rem;">
+                    Testar se MultiOne está recebendo
+                </p>
+                
+                <button class="btn btn-success" onclick="testMultiOneDirect()">
+                    🎯 Testar MultiOne
+                </button>
+                
+                <div class="result-box" id="multione-result" style="display: none;">
+                    Aguardando teste...
+                </div>
+            </div>
+
+            <!-- Teste 6: App Permissions -->
+            <div class="test-card">
+                <h3 style="margin-bottom: 15px;">6. 🔐 App Permissions</h3>
+                <p style="margin-bottom: 15px; font-size: 0.9rem;">
+                    Verificar permissões do app Facebook
+                </p>
+                
+                <button class="btn btn-warning" onclick="checkAppPermissions()">
+                    🔐 Verificar Permissões
+                </button>
+                
+                <div class="result-box" id="permissions-result" style="display: none;">
+                    Aguardando verificação...
+                </div>
+            </div>
         </div>
 
-        <!-- Status Steps -->
-        <div class="status-steps">
-            <div class="step-box success">
-                <div class="step-number">1</div>
-                <strong>Instagram Business</strong><br>
-                <small>✅ Conta profissional</small>
-            </div>
-            <div class="step-box success">
-                <div class="step-number">2</div>
-                <strong>Página Conectada</strong><br>
-                <small>✅ "Teste instagram"</small>
-            </div>
-            <div class="step-box success">
-                <div class="step-number">3</div>
-                <strong>Permissões</strong><br>
-                <small>✅ Todas ativas</small>
-            </div>
-            <div class="step-box">
-                <div class="step-number">4</div>
-                <strong>Webhook</strong><br>
-                <small>⏳ Configurando...</small>
-            </div>
-        </div>
-
-        <!-- Teste Final -->
-        <div class="final-test">
-            <h2 style="margin-bottom: 20px; color: #10b981;">🚀 CONFIGURAÇÃO FINAL</h2>
-            <p style="margin-bottom: 30px;">
-                Agora com o token correto e todas as permissões ativas, vamos configurar o webhook final!
+        <!-- Solução Final -->
+        <div class="solution-card">
+            <h3 style="color: #10b981; margin-bottom: 15px;">🚀 SOLUÇÃO DEFINITIVA:</h3>
+            
+            <p style="margin-bottom: 20px;">
+                Com base nos testes acima, vamos identificar exatamente onde está o problema e corrigir definitivamente.
             </p>
 
-            <button class="btn" onclick="testNewToken()">
-                🔑 TESTAR NOVO TOKEN
+            <button class="btn btn-success" onclick="runFullDiagnostic()" style="width: auto; padding: 15px 40px; margin: 0 auto; display: block;">
+                🔍 DIAGNÓSTICO COMPLETO
             </button>
-
-            <button class="btn btn-primary" onclick="configureWebhookFinal()" style="display: none;" id="webhook-btn">
-                📡 CONFIGURAR WEBHOOK FINAL
-            </button>
-
-            <button class="btn btn-warning" onclick="testFullSystem()" style="display: none;" id="test-btn">
-                📱 TESTAR SISTEMA COMPLETO
-            </button>
-
-            <div class="result-box" id="final-result" style="display: none;">
-                Aguardando teste...
-            </div>
         </div>
 
         <!-- Logs -->
         <div class="logs-container" id="logs-container">
-            <div class="log-entry log-success">
-                <span>[TOKEN]</span> Novo token gerado no Graph API Explorer
+            <div class="log-entry log-error">
+                <span>[PROBLEMA]</span> Page Subscription ativa, mas mensagens não chegam
             </div>
-            <div class="log-entry log-success">
-                <span>[PERMISSÕES]</span> Todas as permissões ativadas no Meta Business Suite
+            <div class="log-entry log-warning">
+                <span>[HIPÓTESE]</span> Webhook pode não estar registrado no Meta Developer
             </div>
             <div class="log-entry log-info">
-                <span>[SISTEMA]</span> Pronto para configuração final do webhook
+                <span>[AÇÃO]</span> Executando testes para identificar problema exato
             </div>
         </div>
     </div>
 
     <script>
-        // Novo token com permissões completas
-        const NEW_TOKEN = 'EAAPHxlZBqFZAQBPCUMlAy4d8ucJ0LZB1l7JFJap9S6weioKntsZCEADCMSzqRxP60CGxo1ZBH0u1ZBFSjhiryJbBMWKIiYrnzufp9EtiywmoSk24ZBsdK17ePX1RBdHjBfYi6snqMGWnihrVHEWCW7E5qJ09hYhuhhjWUTZCOw54whUm2y1OD1vzQPXnGnxifKGPNkxhn1KrQjxF9ZBKpeUQ2Vs3ssw6wBvALsPeLNGd3AixxOfxocApY';
-        const PAGE_ID = '752860274568592'; // ID correto da página "Teste instagram"
         const BACKEND_URL = 'https://instagram-oauth-multione-production.up.railway.app';
-        
-        let pageToken = null;
-        let testResults = {};
+        const PAGE_ID = '752860274568592';
 
-        // Testar novo token
-        async function testNewToken() {
-            addLog('info', '🔑 Testando novo token com permissões...');
-            showResult('🔑 Verificando token...');
+        // Teste endpoint webhook
+        async function testWebhookEndpoint() {
+            addLog('info', '📡 Testando endpoint webhook...');
+            updateResult('endpoint-result', '📡 Testando endpoint...');
             
             try {
-                // 1. Testar token básico
-                const meResponse = await fetch(`https://graph.facebook.com/v23.0/me?access_token=${NEW_TOKEN}`);
-                const meData = await meResponse.json();
+                // Teste GET (verificação)
+                const getResponse = await fetch(`${BACKEND_URL}/webhook/instagram?hub.mode=subscribe&hub.verify_token=webhook_secret_123&hub.challenge=test123`);
                 
-                if (meData.error) {
-                    throw new Error(`Token inválido: ${meData.error.message}`);
-                }
-                
-                addLog('success', `✅ Token válido: ${meData.name}`);
-                testResults.tokenValid = true;
-                
-                // 2. Obter páginas
-                const pagesResponse = await fetch(`https://graph.facebook.com/v23.0/me/accounts?access_token=${NEW_TOKEN}`);
-                const pagesData = await pagesResponse.json();
-                
-                if (pagesData.error) {
-                    throw new Error(`Erro ao obter páginas: ${pagesData.error.message}`);
-                }
-                
-                // 3. Encontrar página "Teste instagram"
-                const targetPage = pagesData.data.find(page => page.id === PAGE_ID);
-                
-                if (!targetPage) {
-                    throw new Error(`Página ${PAGE_ID} não encontrada`);
-                }
-                
-                pageToken = targetPage.access_token;
-                addLog('success', `✅ Página encontrada: ${targetPage.name}`);
-                addLog('success', `🔑 Page Token: ${pageToken.substring(0, 30)}...`);
-                testResults.pageFound = true;
-                
-                // 4. Verificar Instagram conectado
-                const igResponse = await fetch(`https://graph.facebook.com/v23.0/${PAGE_ID}?fields=instagram_business_account&access_token=${pageToken}`);
-                const igData = await igResponse.json();
-                
-                if (igData.instagram_business_account) {
-                    addLog('success', `✅ Instagram conectado: ${igData.instagram_business_account.id}`);
-                    testResults.instagramConnected = true;
+                if (getResponse.ok) {
+                    const challenge = await getResponse.text();
+                    addLog('success', '✅ Webhook GET funcionando');
                     
-                    showResult(`🎉 TESTE COMPLETO - SUCESSO!
+                    // Teste POST (simulação)
+                    const postResponse = await fetch(`${BACKEND_URL}/webhook/instagram`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            object: 'instagram',
+                            entry: [{
+                                id: PAGE_ID,
+                                messaging: [{
+                                    sender: { id: 'test_user' },
+                                    recipient: { id: PAGE_ID },
+                                    timestamp: Date.now(),
+                                    message: {
+                                        mid: 'test_mid',
+                                        text: 'Teste webhook manual'
+                                    }
+                                }]
+                            }]
+                        })
+                    });
                     
-✅ Token válido: ${meData.name}
-✅ Página encontrada: ${targetPage.name}
-✅ Instagram conectado: ${igData.instagram_business_account.id}
-🔑 Page Token: ${pageToken.substring(0, 30)}...
-
-🚀 Pronto para configurar webhook!`);
-                    
-                    document.getElementById('webhook-btn').style.display = 'inline-block';
-                    
-                } else {
-                    addLog('warning', '⚠️ Instagram não conectado via API');
-                    showResult(`⚠️ Instagram não conectado via API
-                    
-✅ Token válido: ${meData.name}
-✅ Página encontrada: ${targetPage.name}
-❌ Instagram não conectado via API Business
-
-💡 Pode ser necessário reconectar o Instagram à página via Meta Business Suite.`);
-                }
-                
-            } catch (error) {
-                addLog('error', `❌ Erro: ${error.message}`);
-                showResult(`❌ Teste falhou:
-                
-${error.message}
-
-💡 Verifique:
-- Token válido no Graph API Explorer
-- Permissões corretas
-- Página conectada ao Instagram`);
-            }
-        }
-
-        // Configurar webhook final
-        async function configureWebhookFinal() {
-            if (!pageToken) {
-                addLog('warning', '⚠️ Execute primeiro o teste do token');
-                return;
-            }
-            
-            addLog('info', '📡 Configurando webhook final...');
-            showResult('📡 Configurando Page Subscription...');
-            
-            try {
-                // 1. Ativar page subscription
-                const subscriptionResponse = await fetch(`https://graph.facebook.com/v23.0/${PAGE_ID}/subscribed_apps`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `subscribed_fields=messages,messaging_postbacks,messaging_optins&access_token=${pageToken}`
-                });
-                
-                const subscriptionData = await subscriptionResponse.json();
-                
-                if (subscriptionResponse.ok && subscriptionData.success) {
-                    addLog('success', '✅ Page Subscription ativada!');
-                    
-                    // 2. Verificar subscription
-                    const verifyResponse = await fetch(`https://graph.facebook.com/v23.0/${PAGE_ID}/subscribed_apps?access_token=${pageToken}`);
-                    const verifyData = await verifyResponse.json();
-                    
-                    if (verifyResponse.ok) {
-                        // 3. Atualizar backend
-                        await updateBackend();
+                    if (postResponse.ok) {
+                        updateResult('endpoint-result', `✅ Endpoint funcionando
                         
-                        showResult(`🎉 WEBHOOK CONFIGURADO COM SUCESSO!
-                        
-✅ Page Subscription: ATIVA
-✅ Backend: Configurado
-✅ Sistema: 100% FUNCIONANDO
-
-🎯 TESTE FINAL:
-Envie um DM para @wesley_costa322 no Instagram!
-A mensagem DEVE aparecer no MultiOne agora!`);
-                        
-                        addLog('success', '🎉 Sistema 100% configurado!');
-                        document.getElementById('test-btn').style.display = 'inline-block';
-                        
+📡 GET Status: ${getResponse.status}
+📨 POST Status: ${postResponse.status}
+🔑 Challenge: ${challenge}
+✅ Webhook respondendo corretamente`);
+                        addLog('success', '✅ Endpoint webhook funcionando');
                     } else {
-                        throw new Error('Falha na verificação da subscription');
+                        throw new Error(`POST falhou: ${postResponse.status}`);
                     }
-                    
                 } else {
-                    throw new Error(`Falha na subscription: ${subscriptionData.error?.message || JSON.stringify(subscriptionData)}`);
+                    throw new Error(`GET falhou: ${getResponse.status}`);
                 }
                 
             } catch (error) {
-                addLog('error', `❌ Erro: ${error.message}`);
-                showResult(`❌ Falha na configuração:
+                updateResult('endpoint-result', `❌ Endpoint com problema:
                 
 ${error.message}
 
-💡 Verifique se o token tem todas as permissões necessárias.`);
+💡 Verifique se o backend está online.`);
+                addLog('error', `❌ Endpoint webhook: ${error.message}`);
             }
         }
 
-        // Atualizar backend
-        async function updateBackend() {
+        // Verificar logs backend
+        async function checkBackendLogs() {
+            addLog('info', '📋 Verificando logs do backend...');
+            updateResult('logs-result', '📋 Buscando logs...');
+            
             try {
-                addLog('info', '🔄 Atualizando backend...');
+                const response = await fetch(`${BACKEND_URL}/api/logs`);
+                const data = await response.json();
                 
-                const response = await fetch(`${BACKEND_URL}/api/setup-webhook`, {
+                if (response.ok && data.logs) {
+                    const webhookLogs = data.logs.filter(log => 
+                        log.message.includes('Webhook') || 
+                        log.message.includes('Instagram') ||
+                        log.message.includes('mensagem') ||
+                        log.message.includes('DM')
+                    );
+                    
+                    if (webhookLogs.length > 0) {
+                        updateResult('logs-result', `📋 ${webhookLogs.length} logs de webhook encontrados:
+                        
+${webhookLogs.slice(0, 5).map(log => `• [${log.timestamp}] ${log.message}`).join('\n')}
+
+${webhookLogs.length > 5 ? `... e mais ${webhookLogs.length - 5} logs` : ''}`);
+                        addLog('success', `✅ ${webhookLogs.length} logs de webhook encontrados`);
+                    } else {
+                        updateResult('logs-result', `❌ Nenhum log de webhook encontrado!
+                        
+📋 Logs recentes:
+${data.logs.slice(0, 3).map(log => `• ${log.message}`).join('\n')}
+
+⚠️ Instagram não está enviando webhooks para o backend.`);
+                        addLog('error', '❌ Nenhuma atividade de webhook detectada');
+                    }
+                } else {
+                    throw new Error('Falha ao acessar logs');
+                }
+                
+            } catch (error) {
+                updateResult('logs-result', `❌ Erro ao verificar logs:
+                
+${error.message}`);
+                addLog('error', `❌ Erro nos logs: ${error.message}`);
+            }
+        }
+
+        // Simular webhook
+        async function simulateWebhook() {
+            addLog('info', '🧪 Simulando webhook Instagram...');
+            updateResult('simulate-result', '🧪 Enviando webhook simulado...');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/test/instagram-message`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        pageId: PAGE_ID,
-                        pageAccessToken: pageToken,
-                        userId: 'wesley_costa322'
+                        message: 'Teste manual - webhook simulado',
+                        userId: 'test_wesley',
+                        pageId: PAGE_ID
                     })
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    addLog('success', '✅ Backend configurado');
+                    updateResult('simulate-result', `✅ Simulação funcionou!
+                    
+🧪 Webhook simulado enviado
+📨 Mensagem processada
+🎯 Resultado: ${data.message}
+
+💡 Se isso funciona, o problema é que o Instagram não está enviando webhooks reais.`);
+                    addLog('success', '✅ Simulação de webhook funcionou');
                 } else {
-                    addLog('warning', `⚠️ Backend: ${data.error}`);
+                    updateResult('simulate-result', `❌ Simulação falhou:
+                    
+${data.error}
+
+⚠️ Problema no processamento interno.`);
+                    addLog('error', `❌ Simulação falhou: ${data.error}`);
                 }
                 
             } catch (error) {
-                addLog('warning', `⚠️ Erro no backend: ${error.message}`);
+                updateResult('simulate-result', `❌ Erro na simulação:
+                
+${error.message}`);
+                addLog('error', `❌ Erro na simulação: ${error.message}`);
             }
         }
 
-        // Testar sistema completo
-        async function testFullSystem() {
-            addLog('info', '📱 Testando sistema completo...');
-            showResult('📱 Executando testes finais...');
+        // Testar MultiOne direto
+        async function testMultiOneDirect() {
+            addLog('info', '🎯 Testando MultiOne diretamente...');
+            updateResult('multione-result', '🎯 Testando MultiOne...');
             
             try {
-                // 1. Testar backend
-                const healthResponse = await fetch(`${BACKEND_URL}/health`);
-                const healthData = await healthResponse.json();
-                
-                addLog('success', `✅ Backend: ${healthData.status}`);
-                
-                // 2. Testar MultiOne
-                const multioneResponse = await fetch(`${BACKEND_URL}/api/test/multione`, {
+                const response = await fetch(`${BACKEND_URL}/api/test/multione`, {
                     method: 'POST'
                 });
-                const multioneData = await multioneResponse.json();
                 
-                if (multioneData.success) {
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateResult('multione-result', `✅ MultiOne funcionando!
+                    
+🎯 Teste enviado com sucesso
+📨 Resposta: ${JSON.stringify(data.result, null, 2)}
+
+✅ MultiOne está recebendo mensagens corretamente.`);
                     addLog('success', '✅ MultiOne funcionando');
                 } else {
-                    addLog('warning', `⚠️ MultiOne: ${multioneData.error}`);
-                }
-                
-                // 3. Verificar webhook
-                const webhookResponse = await fetch(`${BACKEND_URL}/webhook/instagram?hub.mode=subscribe&hub.verify_token=webhook_secret_123&hub.challenge=test123`);
-                
-                if (webhookResponse.ok) {
-                    addLog('success', '✅ Webhook endpoint funcionando');
-                } else {
-                    addLog('warning', '⚠️ Webhook endpoint com problema');
-                }
-                
-                showResult(`🎉 SISTEMA COMPLETO FUNCIONANDO!
-                
-✅ Backend: Online
-✅ MultiOne: Funcionando
-✅ Webhook: Ativo
-✅ Instagram: Conectado
-✅ Page Subscription: Ativa
+                    updateResult('multione-result', `❌ MultiOne falhou:
+                    
+${data.error}
 
-🎯 TESTE FINAL:
-Envie um DM para @wesley_costa322 no Instagram!
-A mensagem deve aparecer no MultiOne!
-
-📱 Teste agora: Envie "Olá" para @wesley_costa322`);
-                
-                addLog('success', '🎉 Sistema 100% operacional!');
-                addLog('info', '📱 Envie DM para @wesley_costa322 para testar');
+⚠️ Problema na conexão com MultiOne.`);
+                    addLog('error', `❌ MultiOne: ${data.error}`);
+                }
                 
             } catch (error) {
-                addLog('error', `❌ Erro no teste: ${error.message}`);
-                showResult(`❌ Erro no teste do sistema:
+                updateResult('multione-result', `❌ Erro MultiOne:
                 
-${error.message}
-
-💡 Alguns componentes podem estar offline.`);
+${error.message}`);
+                addLog('error', `❌ MultiOne erro: ${error.message}`);
             }
         }
 
-        // Mostrar resultado
-        function showResult(message) {
-            const resultBox = document.getElementById('final-result');
-            resultBox.style.display = 'block';
-            resultBox.innerHTML = `<pre style="white-space: pre-wrap; margin: 0;">${message}</pre>`;
+        // Verificar permissões do app
+        async function checkAppPermissions() {
+            addLog('info', '🔐 Verificando permissões do app...');
+            updateResult('permissions-result', '🔐 Verificando permissões...');
+            
+            updateResult('permissions-result', `🔐 Verificação de permissões:
+            
+💡 Verifique manualmente no Meta Developer:
+1. App wa-app-IG deve ter permissões:
+   • instagram_manage_messages ✅
+   • pages_messaging ✅
+   • pages_show_list ✅
+
+2. App deve estar em modo LIVE (não desenvolvimento)
+
+3. Webhook deve estar configurado para Instagram
+
+🔗 Verifique em: https://developers.facebook.com/apps/1064079752566164/`);
+            
+            addLog('warning', '⚠️ Verifique permissões manualmente no Meta Developer');
         }
 
-        // Adicionar log
+        // Diagnóstico completo
+        async function runFullDiagnostic() {
+            addLog('info', '🔍 Executando diagnóstico completo...');
+            
+            await testWebhookEndpoint();
+            await checkBackendLogs();
+            await simulateWebhook();
+            await testMultiOneDirect();
+            await checkAppPermissions();
+            
+            addLog('success', '✅ Diagnóstico completo finalizado');
+            addLog('info', '💡 Analise os resultados para identificar o problema');
+        }
+
+        // Utilitários
+        function updateResult(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.innerHTML = `<pre style="white-space: pre-wrap; margin: 0; font-size: 0.8rem;">${message}</pre>`;
+        }
+
         function addLog(level, message) {
             const logsContainer = document.getElementById('logs-container');
             const timestamp = new Date().toLocaleTimeString();
@@ -522,9 +546,9 @@ ${error.message}
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            addLog('success', '🎯 Sistema final carregado com novo token');
-            addLog('success', '✅ Permissões ativas: Mensagens, Conteúdo, Insights, etc.');
-            addLog('info', '🚀 Pronto para configuração final do webhook');
+            addLog('error', '🚨 Page Subscription ativa, mas mensagens não chegam');
+            addLog('warning', '🔍 Executando diagnóstico para identificar problema');
+            addLog('info', '📡 Suspeita: Webhook não registrado no Meta Developer');
         });
     </script>
 </body>
