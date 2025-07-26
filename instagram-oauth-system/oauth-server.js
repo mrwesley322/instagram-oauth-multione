@@ -15,7 +15,7 @@ const CONFIG = {
     webhookSecret: process.env.WEBHOOK_SECRET || 'webhook_secret_123',
     multioneToken: process.env.MULTIONE_TOKEN || '68eff5505a3989e99dadbc7243c9411efba9a80ef1f59e4680c89678bf63f515',
     multioneApiUrl: process.env.MULTIONE_API_URL || 'https://sock.multi360.digital/api/messages/send',
-    baseUrl: process.env.BASE_URL || 'http://localhost:3000'
+    baseUrl: process.env.BASE_URL || 'https://instagram-oauth-multione-production.up.railway.app'
 };
 
 // Base de dados em memória (em produção, usar banco real)
@@ -525,8 +525,8 @@ app.listen(PORT, () => {
     console.log('🎉 ================================');
     console.log('🚀 INSTAGRAM OAUTH SYSTEM ATIVO!');
     console.log('🎉 ================================');
-    console.log(`🌐 Servidor: http://localhost:${PORT}`);
-    console.log(`📱 Interface: http://localhost:${PORT}`);
+    console.log(`🌐 Servidor: ${CONFIG.baseUrl}`);
+    console.log(`📱 Interface: ${CONFIG.baseUrl}`);
     console.log(`🔗 OAuth Callback: ${CONFIG.baseUrl}/oauth/callback`);
     console.log(`📸 Webhook: ${CONFIG.baseUrl}/webhook/instagram`);
     console.log(`💚 Health: ${CONFIG.baseUrl}/health`);
