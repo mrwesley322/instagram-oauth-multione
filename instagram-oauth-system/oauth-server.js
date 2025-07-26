@@ -13,7 +13,7 @@ const CONFIG = {
     facebookAppId: process.env.FACEBOOK_APP_ID || '1064079752566164',
     facebookAppSecret: process.env.FACEBOOK_APP_SECRET || 'fefb66f99adad1d1c98af7',
     webhookSecret: process.env.WEBHOOK_SECRET || 'webhook_secret_123',
-    multioneToken: process.env.MULTIONE_TOKEN || 'c6960cfb9ab93d2109230ae00cf98cc2a87eccbcfe204d178b4e7aacbd1aded0',
+    multioneToken: process.env.MULTIONE_TOKEN || '68eff5505a3989e99dadbc7243c9411efba9a80ef1f59e4680c89678bf63f515',
     multioneApiUrl: process.env.MULTIONE_API_URL || 'https://sock.multi360.digital/api/messages/send',
     baseUrl: process.env.BASE_URL || 'http://localhost:3000'
 };
