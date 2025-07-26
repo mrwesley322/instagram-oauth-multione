@@ -1,548 +1,578 @@
-// oauth-server.js - Sistema Completo OAuth + Webhook
-const express = require('express');
-const axios = require('axios');
-const crypto = require('crypto');
-const path = require('path');
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 Conversor de Token - User → Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-const app = express();
-app.use(express.json());
-app.use(express.static('public'));
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8, #1e40af);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-// Configurações
-const CONFIG = {
-    facebookAppId: process.env.FACEBOOK_APP_ID || '1064079752566164',
-    facebookAppSecret: process.env.FACEBOOK_APP_SECRET || 'fefb66f99adad1d1c98af7',
-    webhookSecret: process.env.WEBHOOK_SECRET || 'webhook_secret_123',
-    multioneToken: process.env.MULTIONE_TOKEN || '68eff5505a3989e99dadbc7243c9411efba9a80ef1f59e4680c89678bf63f515',
-    multioneApiUrl: process.env.MULTIONE_API_URL || 'https://sock.multi360.digital/api/messages/send',
-    baseUrl: process.env.BASE_URL || 'http://localhost:3000'
-};
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
 
-// Base de dados em memória (em produção, usar banco real)
-const connectedAccounts = new Map();
-const webhookSubscriptions = new Map();
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
 
-console.log('🚀 Inicializando Sistema OAuth + Webhook...');
+        .header h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
 
-// ==========================================
-// ENDPOINTS OAUTH E CONFIGURAÇÃO
-// ==========================================
+        .converter-badge {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin: 10px 0;
+        }
 
-// Página principal
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+        .main-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
 
-// Callback OAuth do Facebook
-app.get('/oauth/callback', async (req, res) => {
-    const { code, state, error } = req.query;
-    
-    if (error) {
-        console.log('❌ OAuth Error:', error);
-        return res.redirect('/?error=' + error);
-    }
-    
-    try {
-        console.log('🔑 Processando callback OAuth...');
-        
-        // Trocar code por access token
-        const tokenResponse = await axios.get('https://graph.facebook.com/v18.0/oauth/access_token', {
-            params: {
-                client_id: CONFIG.facebookAppId,
-                client_secret: CONFIG.facebookAppSecret,
-                redirect_uri: `${CONFIG.baseUrl}/oauth/callback`,
-                code: code
+        .btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.1rem;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .conversion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .token-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .token-card:hover {
+            transform: translateY(-5px);
+            border-color: #3b82f6;
+        }
+
+        .token-card.user-token {
+            border-color: #f59e0b;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(255, 255, 255, 1));
+        }
+
+        .token-card.page-token {
+            border-color: #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(255, 255, 255, 1));
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .user-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .page-icon { background: linear-gradient(135deg, #10b981, #059669); }
+
+        .token-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .pages-list {
+            background: #f0f9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .page-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-item:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+
+        .page-item.selected {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .logs-container {
+            background: #1f2937;
+            color: #f9fafb;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-left: 3px solid transparent;
+            padding-left: 10px;
+        }
+
+        .log-info { color: #60a5fa; border-left-color: #60a5fa; }
+        .log-success { color: #34d399; border-left-color: #34d399; }
+        .log-warning { color: #fbbf24; border-left-color: #fbbf24; }
+        .log-error { color: #f87171; border-left-color: #f87171; }
+
+        .conversion-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #3b82f6;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .conversion-grid {
+                grid-template-columns: 1fr;
             }
-        });
-        
-        const accessToken = tokenResponse.data.access_token;
-        console.log('✅ Access token obtido');
-        
-        // Obter informações do usuário
-        const userResponse = await axios.get('https://graph.facebook.com/v18.0/me', {
-            params: {
-                access_token: accessToken,
-                fields: 'id,name,email'
+            
+            .container {
+                padding: 15px;
             }
-        });
-        
-        const userId = userResponse.data.id;
-        
-        // Salvar token do usuário
-        connectedAccounts.set(userId, {
-            userId,
-            name: userResponse.data.name,
-            email: userResponse.data.email,
-            accessToken,
-            connectedAt: new Date().toISOString()
-        });
-        
-        console.log(`✅ Usuário ${userResponse.data.name} conectado`);
-        
-        res.redirect('/?success=true&user=' + encodeURIComponent(userResponse.data.name));
-        
-    } catch (error) {
-        console.error('❌ Erro OAuth:', error.message);
-        res.redirect('/?error=oauth_failed');
-    }
-});
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔄 Conversor de Token</h1>
+            <div class="converter-badge">🔧 USER TOKEN → PAGE TOKEN</div>
+            <p>Convertendo User Access Token em Page Access Token para webhook</p>
+        </div>
 
-// Listar páginas do usuário
-app.get('/api/user/pages', async (req, res) => {
-    const { userId, accessToken } = req.query;
-    
-    if (!accessToken) {
-        return res.status(401).json({ error: 'Access token required' });
-    }
-    
-    try {
-        console.log('📄 Carregando páginas do usuário...');
+        <!-- Painel Principal -->
+        <div class="main-panel">
+            <h2 style="margin-bottom: 20px;">🎯 Problema: Erro 210 - Page Access Token Necessário</h2>
+            <p style="margin-bottom: 30px; color: #666;">
+                O token que temos funciona, mas é um "User Token". Para webhook, precisamos de um "Page Token".
+                Vamos converter automaticamente!
+            </p>
+            
+            <button class="btn" onclick="convertUserToPageToken()">
+                🔄 Converter User Token → Page Token
+            </button>
+            
+            <button class="btn btn-success" onclick="testPageTokens()">
+                ✅ Testar Page Tokens
+            </button>
+            
+            <button class="btn btn-warning" onclick="configureWebhookWithPageToken()">
+                🔗 Configurar Webhook com Page Token
+            </button>
+        </div>
+
+        <!-- Conversão de Tokens -->
+        <div class="conversion-grid">
+            <!-- User Token -->
+            <div class="token-card user-token">
+                <div class="card-header">
+                    <div class="card-icon user-icon">👤</div>
+                    <div>
+                        <h3 style="margin: 0; color: #333;">User Access Token</h3>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Token atual (funcionando)</p>
+                    </div>
+                </div>
+                
+                <div class="token-info" id="user-token-info">
+                    <strong>📝 Token:</strong> EAAPHxlZBqFZAQBPCNrYaHE085SIXDaIFYKILCQ6tHDU...<br>
+                    <strong>👤 Usuário:</strong> Wesley Costa<br>
+                    <strong>✅ Status:</strong> NOVO TOKEN FUNCIONANDO<br>
+                    <strong>🔄 Ação:</strong> Obter Page Token e reconfigurar webhook
+                </div>
+                
+                <button class="btn" onclick="testUserToken()" style="width: 100%;">
+                    🧪 Testar User Token
+                </button>
+            </div>
+
+            <!-- Seta de Conversão -->
+            <div class="conversion-arrow">
+                ➡️
+            </div>
+
+            <!-- Page Tokens -->
+            <div class="token-card page-token">
+                <div class="card-header">
+                    <div class="card-icon page-icon">📄</div>
+                    <div>
+                        <h3 style="margin: 0; color: #333;">Page Access Tokens</h3>
+                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Tokens para webhook</p>
+                    </div>
+                </div>
+                
+                <div class="pages-list" id="pages-list">
+                    <p style="color: #666; text-align: center;">Clique em "Converter" para carregar páginas...</p>
+                </div>
+                
+                <button class="btn btn-success" onclick="useSelectedPageToken()" style="width: 100%;" disabled id="use-page-token-btn">
+                    🚀 Usar Page Token Selecionado
+                </button>
+            </div>
+        </div>
+
+        <!-- Logs do Sistema -->
+        <div class="logs-container" id="logs-container">
+            <div class="log-entry log-success">
+                <span>[TOKEN NOVO]</span> Token atualizado e funcionando: EAAPHxlZBqFZAQBPCNrYaHE085SIXDaIFYKILCQ6tHDU...
+            </div>
+            <div class="log-entry log-info">
+                <span>[AÇÃO]</span> Clique em "Converter" para obter o Page Token do novo User Token.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // User Token que funciona (ATUALIZADO)
+        const USER_TOKEN = 'EAAPHxlZBqFZAQBPCNrYaHE085SIXDaIFYKILCQ6tHDU43rJLSKEQZAqtRpCCbV6vx2zwshSz54XZADKHZCGzEhhW8vZBpQShqI5aUZCCt03ZBjIjXco7m8UnpojOqKERMXDvVM0WlzN5Jvdv74XGa3Jce5SucR9IK2ABkRup47qvOxull5vJtZAAwCyiAFmlZADH5BLGuZBeH5FFQzaCPIYGwP4BN67ZC7DNO0XlhZB1pyk2kkIpBbBZB4CcPkegZDZD';
         
-        const pagesResponse = await axios.get('https://graph.facebook.com/v18.0/me/accounts', {
-            params: { access_token: accessToken }
-        });
-        
-        const pages = pagesResponse.data.data;
-        
-        // Para cada página, verificar se tem Instagram conectado
-        const pagesWithInstagram = await Promise.all(pages.map(async (page) => {
+        let userPages = [];
+        let selectedPageToken = null;
+        let selectedPageId = null;
+
+        // Converter User Token para Page Tokens
+        async function convertUserToPageToken() {
+            addLog('info', '🔄 Iniciando conversão User Token → Page Tokens...');
+            
             try {
-                const igResponse = await axios.get(`https://graph.facebook.com/v18.0/${page.id}`, {
-                    params: {
-                        access_token: page.access_token,
-                        fields: 'instagram_business_account'
-                    }
+                // 1. Obter páginas do usuário
+                const response = await fetch(`https://graph.facebook.com/v23.0/me/accounts?access_token=${USER_TOKEN}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+                
+                if (!data.data || data.data.length === 0) {
+                    addLog('warning', '⚠️ Nenhuma página encontrada para este usuário');
+                    return;
+                }
+                
+                userPages = data.data;
+                addLog('success', `✅ ${userPages.length} páginas encontradas!`);
+                
+                // 2. Mostrar páginas
+                displayPages();
+                
+                // 3. Para cada página, verificar Instagram
+                for (const page of userPages) {
+                    await checkInstagramForPage(page);
+                }
+                
+                addLog('success', '🎉 Conversão concluída! Selecione uma página com Instagram.');
+                
+            } catch (error) {
+                addLog('error', `❌ Erro na conversão: ${error.message}`);
+            }
+        }
+
+        // Exibir páginas
+        function displayPages() {
+            const pagesList = document.getElementById('pages-list');
+            pagesList.innerHTML = '';
+            
+            userPages.forEach((page, index) => {
+                const pageElement = document.createElement('div');
+                pageElement.className = 'page-item';
+                pageElement.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 5px;">${page.name}</div>
+                    <div style="font-size: 0.8rem; color: #666;">ID: ${page.id}</div>
+                    <div style="font-size: 0.8rem; color: #666;">Categoria: ${page.category}</div>
+                    <div style="font-size: 0.8rem; color: #666;">Token: ${page.access_token.substring(0, 20)}...</div>
+                    <div class="instagram-check" id="instagram-${page.id}" style="font-size: 0.8rem; margin-top: 5px; color: #f59e0b;">
+                        🔍 Verificando Instagram...
+                    </div>
+                `;
+                
+                pageElement.onclick = () => selectPage(page, pageElement);
+                pagesList.appendChild(pageElement);
+            });
+        }
+
+        // Verificar Instagram para página
+        async function checkInstagramForPage(page) {
+            try {
+                const response = await fetch(`https://graph.facebook.com/v23.0/${page.id}?fields=instagram_business_account&access_token=${page.access_token}`);
+                const data = await response.json();
+                
+                const instagramElement = document.getElementById(`instagram-${page.id}`);
+                
+                if (data.instagram_business_account) {
+                    instagramElement.innerHTML = '✅ Instagram conectado';
+                    instagramElement.style.color = '#10b981';
+                    page.instagram_account = data.instagram_business_account;
+                    addLog('success', `✅ ${page.name}: Instagram encontrado (${data.instagram_business_account.id})`);
+                } else {
+                    instagramElement.innerHTML = '❌ Sem Instagram';
+                    instagramElement.style.color = '#ef4444';
+                    addLog('warning', `⚠️ ${page.name}: Sem conta Instagram conectada`);
+                }
+            } catch (error) {
+                const instagramElement = document.getElementById(`instagram-${page.id}`);
+                instagramElement.innerHTML = '❌ Erro na verificação';
+                instagramElement.style.color = '#ef4444';
+                addLog('error', `❌ Erro verificando Instagram para ${page.name}: ${error.message}`);
+            }
+        }
+
+        // Selecionar página
+        function selectPage(page, element) {
+            // Remover seleção anterior
+            document.querySelectorAll('.page-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Selecionar atual
+            element.classList.add('selected');
+            selectedPageToken = page.access_token;
+            selectedPageId = page.id;
+            
+            // Habilitar botão
+            document.getElementById('use-page-token-btn').disabled = false;
+            
+            addLog('info', `📄 Página selecionada: ${page.name}`);
+            addLog('info', `🔑 Page Token: ${page.access_token.substring(0, 30)}...`);
+        }
+
+        // Usar page token selecionado
+        async function useSelectedPageToken() {
+            if (!selectedPageToken) {
+                addLog('warning', '⚠️ Selecione uma página primeiro');
+                return;
+            }
+            
+            addLog('info', '🚀 Testando Page Token selecionado...');
+            
+            try {
+                // Testar webhook com Page Token
+                const response = await fetch(`https://graph.facebook.com/v23.0/${selectedPageId}/subscribed_apps`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `subscribed_fields=messages,messaging_postbacks,messaging_optins&access_token=${selectedPageToken}`
                 });
                 
-                return {
-                    ...page,
-                    instagram_account: igResponse.data.instagram_business_account || null
-                };
-            } catch (error) {
-                return { ...page, instagram_account: null };
-            }
-        }));
-        
-        console.log(`✅ ${pages.length} páginas carregadas`);
-        res.json({ pages: pagesWithInstagram });
-        
-    } catch (error) {
-        console.error('❌ Erro ao carregar páginas:', error.message);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Configurar webhook automaticamente para uma página
-app.post('/api/setup-webhook', async (req, res) => {
-    const { pageId, pageAccessToken, userId } = req.body;
-    
-    try {
-        console.log(`🔗 Configurando webhook para página ${pageId}...`);
-        
-        // 1. Subscrever webhook na página
-        const subscribeResponse = await axios.post(
-            `https://graph.facebook.com/v18.0/${pageId}/subscribed_apps`,
-            {
-                subscribed_fields: 'messages,messaging_postbacks,messaging_optins,message_deliveries,messaging_referrals'
-            },
-            {
-                params: { access_token: pageAccessToken }
-            }
-        );
-        
-        if (subscribeResponse.data.success) {
-            // Salvar configuração
-            webhookSubscriptions.set(pageId, {
-                pageId,
-                userId,
-                accessToken: pageAccessToken,
-                subscribedAt: new Date().toISOString(),
-                active: true
-            });
-            
-            console.log(`✅ Webhook configurado para página ${pageId}`);
-            
-            res.json({
-                success: true,
-                message: 'Webhook configurado com sucesso',
-                pageId,
-                webhookUrl: `${CONFIG.baseUrl}/webhook/instagram`
-            });
-        } else {
-            throw new Error('Falha ao configurar webhook');
-        }
-        
-    } catch (error) {
-        console.error('❌ Erro ao configurar webhook:', error.message);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
-    }
-});
-
-// Listar contas conectadas
-app.get('/api/connected-accounts', (req, res) => {
-    const accounts = Array.from(connectedAccounts.values()).map(account => ({
-        userId: account.userId,
-        name: account.name,
-        email: account.email,
-        connectedAt: account.connectedAt,
-        webhooksActive: Array.from(webhookSubscriptions.values())
-            .filter(sub => sub.userId === account.userId && sub.active).length
-    }));
-    
-    res.json({ accounts });
-});
-
-// Desconectar conta
-app.delete('/api/disconnect/:userId', (req, res) => {
-    const { userId } = req.params;
-    
-    // Remover webhooks da conta
-    for (const [pageId, subscription] of webhookSubscriptions.entries()) {
-        if (subscription.userId === userId) {
-            webhookSubscriptions.delete(pageId);
-        }
-    }
-    
-    // Remover conta
-    connectedAccounts.delete(userId);
-    
-    console.log(`🗑️ Conta ${userId} desconectada`);
-    res.json({ success: true });
-});
-
-// ==========================================
-// WEBHOOK INSTAGRAM/FACEBOOK
-// ==========================================
-
-// Verificação do webhook (GET)
-app.get('/webhook/instagram', (req, res) => {
-    const mode = req.query['hub.mode'];
-    const token = req.query['hub.verify_token'];
-    const challenge = req.query['hub.challenge'];
-    
-    console.log('🔍 Verificação webhook:', { mode, token, challenge });
-    
-    if (mode === 'subscribe' && token === CONFIG.webhookSecret) {
-        console.log('✅ Webhook Instagram verificado');
-        res.status(200).send(challenge);
-    } else {
-        console.log('❌ Verificação falhou');
-        res.sendStatus(403);
-    }
-});
-
-// Receber mensagens do webhook (POST)
-app.post('/webhook/instagram', express.raw({type: 'application/json'}), async (req, res) => {
-    const signature = req.get('X-Hub-Signature-256');
-    
-    // Verificar assinatura (em produção)
-    if (process.env.NODE_ENV === 'production' && CONFIG.facebookAppSecret) {
-        const expectedSignature = crypto
-            .createHmac('sha256', CONFIG.facebookAppSecret)
-            .update(req.body, 'utf8')
-            .digest('hex');
-            
-        if (signature !== `sha256=${expectedSignature}`) {
-            console.log('❌ Assinatura inválida');
-            return res.sendStatus(403);
-        }
-    }
-    
-    const body = JSON.parse(req.body.toString());
-    console.log('📸 Webhook Instagram recebido:', JSON.stringify(body, null, 2));
-    
-    try {
-        // Processar cada entrada
-        for (const entry of body.entry || []) {
-            await processWebhookEntry(entry);
-        }
-        
-        res.status(200).send('EVENT_RECEIVED');
-    } catch (error) {
-        console.error('❌ Erro processando webhook:', error);
-        res.status(500).send('ERROR');
-    }
-});
-
-// Processar entrada do webhook
-async function processWebhookEntry(entry) {
-    const pageId = entry.id;
-    
-    // Verificar se temos essa página registrada
-    const subscription = webhookSubscriptions.get(pageId);
-    if (!subscription || !subscription.active) {
-        console.log(`⚠️ Página ${pageId} não está registrada`);
-        return;
-    }
-    
-    // Processar mensagens
-    if (entry.messaging) {
-        for (const messaging of entry.messaging) {
-            await processInstagramMessage(messaging, subscription);
-        }
-    }
-    
-    // Processar mudanças (Instagram)
-    if (entry.changes) {
-        for (const change of entry.changes) {
-            if (change.field === 'messages') {
-                await processInstagramDM(change.value, subscription);
-            }
-        }
-    }
-}
-
-// Processar mensagem do Instagram
-async function processInstagramMessage(messaging, subscription) {
-    try {
-        if (messaging.message && messaging.message.text) {
-            console.log(`💬 Mensagem Instagram recebida: "${messaging.message.text}"`);
-            
-            // Obter informações do remetente
-            const senderInfo = await getUserInfo(messaging.sender.id, subscription.accessToken);
-            
-            const messageData = {
-                number: messaging.sender.id,
-                message: messaging.message.text,
-                sender_id: messaging.sender.id,
-                sender_name: senderInfo.name || `Usuario Instagram`,
-                platform: 'instagram',
-                timestamp: new Date().toISOString(),
-                type: 'inbound',
-                external_id: messaging.sender.id,
-                external_message_id: messaging.message.mid,
-                metadata: {
-                    page_id: subscription.pageId,
-                    instagram_account: senderInfo.instagram_id,
-                    received_at: new Date().toISOString()
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    addLog('success', '🎉 SUCESSO! Page Token funcionou para webhook!');
+                    addLog('success', `✅ Webhook configurado com Page Token`);
+                    addLog('success', `🔑 Use este token: ${selectedPageToken.substring(0, 30)}...`);
+                    
+                    // Configurar no backend
+                    await configureBackendWithPageToken();
+                    
+                } else {
+                    addLog('error', `❌ Ainda falhou: ${data.error?.message || JSON.stringify(data)}`);
+                    addLog('info', `🔍 Status: ${response.status}`);
                 }
-            };
-            
-            // Enviar para MultiOne
-            await sendToMultiOne(messageData);
-        }
-    } catch (error) {
-        console.error('❌ Erro processando mensagem Instagram:', error.message);
-    }
-}
-
-// Processar DM do Instagram (Instagram Graph API)
-async function processInstagramDM(messageData, subscription) {
-    try {
-        console.log('📱 DM Instagram recebido:', messageData);
-        
-        // Estrutura específica do Instagram Graph API
-        if (messageData.message && messageData.message.text) {
-            const multioneData = {
-                number: messageData.from.id,
-                message: messageData.message.text,
-                sender_id: messageData.from.id,
-                sender_name: messageData.from.username || 'Usuario Instagram',
-                platform: 'instagram',
-                timestamp: new Date().toISOString(),
-                type: 'inbound',
-                external_id: messageData.from.id,
-                external_message_id: messageData.message.mid
-            };
-            
-            await sendToMultiOne(multioneData);
-        }
-    } catch (error) {
-        console.error('❌ Erro processando DM Instagram:', error.message);
-    }
-}
-
-// Obter informações do usuário
-async function getUserInfo(userId, accessToken) {
-    try {
-        const response = await axios.get(`https://graph.facebook.com/v18.0/${userId}`, {
-            params: {
-                access_token: accessToken,
-                fields: 'name,first_name,profile_pic'
+                
+            } catch (error) {
+                addLog('error', `❌ Erro ao testar Page Token: ${error.message}`);
             }
-        });
-        
-        return response.data;
-    } catch (error) {
-        console.log(`⚠️ Não foi possível obter info do usuário ${userId}`);
-        return { name: 'Usuario Instagram' };
-    }
-}
-
-// Enviar para MultiOne
-async function sendToMultiOne(messageData) {
-    try {
-        console.log('🚀 Enviando para MultiOne:', messageData);
-        
-        const response = await axios.post(CONFIG.multioneApiUrl, messageData, {
-            headers: {
-                'Authorization': `Bearer ${CONFIG.multioneToken}`,
-                'Content-Type': 'application/json'
-            },
-            timeout: 15000
-        });
-        
-        console.log('✅ Mensagem enviada para MultiOne:', response.data);
-        return response.data;
-        
-    } catch (error) {
-        console.error('❌ Erro ao enviar para MultiOne:', error.response?.data || error.message);
-        throw error;
-    }
-}
-
-// ==========================================
-// ENDPOINTS DE MONITORAMENTO
-// ==========================================
-
-// Health check
-app.get('/health', (req, res) => {
-    res.json({
-        status: 'OK',
-        service: 'Instagram OAuth + Webhook System',
-        timestamp: new Date().toISOString(),
-        connections: {
-            connectedAccounts: connectedAccounts.size,
-            activeWebhooks: webhookSubscriptions.size,
-            multioneConnection: CONFIG.multioneToken ? 'configured' : 'missing'
         }
-    });
-});
 
-// Status do sistema
-app.get('/api/system/status', (req, res) => {
-    const stats = {
-        accounts: {
-            total: connectedAccounts.size,
-            active: Array.from(connectedAccounts.values()).length
-        },
-        webhooks: {
-            total: webhookSubscriptions.size,
-            active: Array.from(webhookSubscriptions.values()).filter(sub => sub.active).length
-        },
-        system: {
-            uptime: process.uptime(),
-            memory: process.memoryUsage(),
-            nodeVersion: process.version
-        }
-    };
-    
-    res.json(stats);
-});
-
-// Logs recentes (em produção, usar sistema de logs real)
-const recentLogs = [];
-const originalConsoleLog = console.log;
-console.log = (...args) => {
-    const logEntry = {
-        timestamp: new Date().toISOString(),
-        message: args.join(' '),
-        level: 'info'
-    };
-    recentLogs.unshift(logEntry);
-    if (recentLogs.length > 100) recentLogs.pop();
-    originalConsoleLog(...args);
-};
-
-app.get('/api/logs', (req, res) => {
-    res.json({ logs: recentLogs.slice(0, 50) });
-});
-
-// ==========================================
-// UTILITÁRIOS E TESTES
-// ==========================================
-
-// Testar conexão MultiOne
-app.post('/api/test/multione', async (req, res) => {
-    try {
-        const testMessage = {
-            number: 'test_user_oauth',
-            message: 'Teste de conexão OAuth System → MultiOne',
-            sender_id: 'oauth_test',
-            sender_name: 'OAuth Test System',
-            platform: 'instagram',
-            timestamp: new Date().toISOString(),
-            type: 'inbound',
-            test: true
-        };
-        
-        const result = await sendToMultiOne(testMessage);
-        res.json({ success: true, result });
-        
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// Simular mensagem Instagram (para testes)
-app.post('/api/test/instagram-message', async (req, res) => {
-    const { message, userId = 'test_user', pageId } = req.body;
-    
-    if (!message) {
-        return res.status(400).json({ error: 'Message required' });
-    }
-    
-    try {
-        const mockMessaging = {
-            sender: { id: userId },
-            recipient: { id: pageId || 'test_page' },
-            timestamp: Date.now(),
-            message: {
-                mid: `test_mid_${Date.now()}`,
-                text: message
+        // Configurar backend com Page Token
+        async function configureBackendWithPageToken() {
+            addLog('info', '🔗 Configurando backend com Page Token...');
+            
+            try {
+                const response = await fetch('/api/setup-webhook', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pageId: selectedPageId,
+                        pageAccessToken: selectedPageToken,
+                        userId: 'wesley_costa322'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('success', '🎉 BACKEND CONFIGURADO COM SUCESSO!');
+                    addLog('success', `📡 Webhook URL: ${data.webhookUrl}`);
+                } else {
+                    addLog('error', `❌ Erro no backend: ${data.error}`);
+                }
+                
+            } catch (error) {
+                addLog('warning', `⚠️ Backend: ${error.message}`);
             }
-        };
-        
-        const mockSubscription = {
-            pageId: pageId || 'test_page',
-            userId: 'test_user',
-            accessToken: 'test_token',
-            active: true
-        };
-        
-        await processInstagramMessage(mockMessaging, mockSubscription);
-        
-        res.json({ 
-            success: true, 
-            message: 'Mensagem de teste processada' 
+        }
+
+        // Testar User Token
+        async function testUserToken() {
+            addLog('info', '🧪 Testando User Token...');
+            
+            try {
+                const response = await fetch(`https://graph.facebook.com/v23.0/me?access_token=${USER_TOKEN}`);
+                const data = await response.json();
+                
+                if (data.id) {
+                    addLog('success', `✅ User Token funcionando: ${data.name} (${data.id})`);
+                } else {
+                    addLog('error', `❌ User Token falhou: ${data.error?.message}`);
+                }
+            } catch (error) {
+                addLog('error', `❌ Erro: ${error.message}`);
+            }
+        }
+
+        // Testar Page Tokens
+        async function testPageTokens() {
+            if (userPages.length === 0) {
+                addLog('warning', '⚠️ Execute a conversão primeiro');
+                return;
+            }
+            
+            addLog('info', '🧪 Testando todos os Page Tokens...');
+            
+            for (const page of userPages) {
+                try {
+                    const response = await fetch(`https://graph.facebook.com/v23.0/me?access_token=${page.access_token}`);
+                    const data = await response.json();
+                    
+                    if (data.id) {
+                        addLog('success', `✅ ${page.name}: Page Token OK (${data.id})`);
+                    } else {
+                        addLog('error', `❌ ${page.name}: ${data.error?.message}`);
+                    }
+                } catch (error) {
+                    addLog('error', `❌ ${page.name}: ${error.message}`);
+                }
+            }
+        }
+
+        // Configurar webhook com page token
+        async function configureWebhookWithPageToken() {
+            if (!selectedPageToken) {
+                addLog('warning', '⚠️ Selecione um Page Token primeiro');
+                return;
+            }
+            
+            await useSelectedPageToken();
+        }
+
+        // Adicionar log
+        function addLog(level, message) {
+            const logsContainer = document.getElementById('logs-container');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${level}`;
+            logEntry.innerHTML = `<span>[${timestamp}]</span> ${message}`;
+            
+            logsContainer.insertBefore(logEntry, logsContainer.firstChild);
+            
+            // Manter apenas 100 logs
+            while (logsContainer.children.length > 100) {
+                logsContainer.removeChild(logsContainer.lastChild);
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('info', '🔄 Conversor carregado - Pronto para converter User Token em Page Token');
+            addLog('warning', '⚠️ Erro 210: Webhook precisa de Page Access Token, não User Token');
         });
-        
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
-
-// ==========================================
-// INICIALIZAÇÃO DO SERVIDOR
-// ==========================================
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log('🎉 ================================');
-    console.log('🚀 INSTAGRAM OAUTH SYSTEM ATIVO!');
-    console.log('🎉 ================================');
-    console.log(`🌐 Servidor: http://localhost:${PORT}`);
-    console.log(`📱 Interface: http://localhost:${PORT}`);
-    console.log(`🔗 OAuth Callback: ${CONFIG.baseUrl}/oauth/callback`);
-    console.log(`📸 Webhook: ${CONFIG.baseUrl}/webhook/instagram`);
-    console.log(`💚 Health: ${CONFIG.baseUrl}/health`);
-    console.log('🎉 ================================');
-    console.log(`📋 Config: App ID ${CONFIG.facebookAppId}`);
-    console.log(`🔑 MultiOne: ${CONFIG.multioneToken ? 'Configurado' : 'Faltando'}`);
-    console.log('🎉 ================================');
-});
-
-// Tratamento de erros não capturados
-process.on('uncaughtException', (error) => {
-    console.error('❌ Erro não capturado:', error);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Promise rejeitada:', reason);
-});
-
-module.exports = app;
+    </script>
+</body>
+</html>
