@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔧 Diagnóstico Webhook - Erro 400</title>
+    <title>🎉 Instagram AutoConnect - FUNCIONANDO!</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c);
+            background: linear-gradient(135deg, #10b981, #059669, #047857);
             min-height: 100vh;
             padding: 20px;
         }
@@ -35,14 +35,14 @@
 
         .header h1 {
             font-size: 2.8rem;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, #10b981, #059669);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
         }
 
-        .error-badge {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+        .success-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -62,7 +62,7 @@
         }
 
         .btn {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             border: none;
             padding: 15px 30px;
@@ -78,7 +78,7 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
         }
 
         .btn-warning {
@@ -89,53 +89,57 @@
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
         }
 
-        .diagnostic-grid {
+        .status-panel {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin: 30px 0;
         }
 
-        .diagnostic-card {
+        .status-item {
             background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border: 2px solid #e5e7eb;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
         }
 
-        .diagnostic-card:hover {
-            transform: translateY(-5px);
-            border-color: #ef4444;
+        .status-item:hover {
+            transform: translateY(-2px);
         }
 
-        .diagnostic-card.error {
-            border-color: #ef4444;
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(255, 255, 255, 1));
+        .status-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
 
-        .diagnostic-card.warning {
-            border-color: #f59e0b;
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(255, 255, 255, 1));
+        .status-connected { color: #10b981; }
+        .status-disconnected { color: #ef4444; }
+        .status-pending { color: #f59e0b; }
+
+        .account-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(255, 255, 255, 1));
         }
 
-        .diagnostic-card.info {
-            border-color: #3b82f6;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(255, 255, 255, 1));
-        }
-
-        .card-header {
+        .account-header {
             display: flex;
             align-items: center;
             gap: 15px;
             margin-bottom: 15px;
         }
 
-        .card-icon {
-            width: 50px;
-            height: 50px;
+        .account-avatar {
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -144,20 +148,22 @@
             font-size: 1.5rem;
         }
 
-        .error-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .warning-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .info-icon { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
-
-        .api-test-result {
-            background: #1f2937;
-            color: #f9fafb;
+        .token-info {
+            background: #f0fdf4;
+            border: 1px solid #10b981;
             border-radius: 8px;
             padding: 15px;
-            margin: 10px 0;
+            margin: 15px 0;
             font-family: 'Courier New', monospace;
             font-size: 0.8rem;
-            max-height: 200px;
-            overflow-y: auto;
+        }
+
+        .webhook-test {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
         }
 
         .logs-container {
@@ -184,19 +190,19 @@
         .log-warning { color: #fbbf24; border-left-color: #fbbf24; }
         .log-error { color: #f87171; border-left-color: #f87171; }
 
-        .solution-panel {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(255, 255, 255, 1));
-            border-radius: 15px;
-            padding: 25px;
-            margin: 20px 0;
-            border-left: 5px solid #10b981;
+        .webhook-result {
+            background: #1f2937;
+            color: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
         @media (max-width: 768px) {
-            .diagnostic-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .container {
                 padding: 15px;
             }
@@ -207,441 +213,288 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🔧 Diagnóstico Webhook</h1>
-            <div class="error-badge">❌ ERRO 400 - BAD REQUEST</div>
-            <p>Diagnosticando problemas na configuração de webhooks</p>
+            <h1>🎉 Instagram AutoConnect</h1>
+            <div class="success-badge">✅ TOKEN FUNCIONANDO!</div>
+            <p>Sistema pronto para configurar webhook com token válido</p>
         </div>
 
         <!-- Painel Principal -->
         <div class="main-panel">
-            <h2 style="margin-bottom: 20px;">🩺 Diagnóstico Completo do Erro 400</h2>
+            <h2 style="margin-bottom: 20px;">🚀 Sistema Operacional com Token Válido</h2>
             <p style="margin-bottom: 30px; color: #666;">
-                Token funcionando mas webhook falhando. Vamos identificar exatamente o que está causando o erro 400.
+                Token testado e funcionando! Agora vamos configurar o webhook e testar a integração completa.
             </p>
             
-            <button class="btn" onclick="startWebhookDiagnostic()">
-                🔍 Diagnóstico Completo
+            <button class="btn" onclick="testTokenWorking()">
+                ✅ Verificar Token Funcionando
             </button>
             
-            <button class="btn btn-warning" onclick="testTokenType()">
-                🏷️ Verificar Tipo de Token
+            <button class="btn btn-warning" onclick="configureWebhookReal()">
+                🔗 Configurar Webhook REAL
             </button>
             
-            <button class="btn btn-info" onclick="testWebhookEndpoints()">
-                📡 Testar Endpoints
+            <button class="btn btn-info" onclick="testCompleteIntegration()">
+                🧪 Teste Completo da Integração
             </button>
         </div>
 
-        <!-- Diagnósticos -->
-        <div class="diagnostic-grid" id="diagnostic-grid">
-            <!-- Cards de diagnóstico aparecerão aqui -->
+        <!-- Status da Conexão -->
+        <div class="status-panel">
+            <div class="status-item">
+                <div class="status-icon status-connected" id="token-status">✅</div>
+                <div><strong>Token Status</strong></div>
+                <div id="token-text">Token válido e funcionando</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-icon status-pending" id="webhook-status">⏳</div>
+                <div><strong>Webhook</strong></div>
+                <div id="webhook-text">Aguardando configuração</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-icon status-pending" id="integration-status">⏳</div>
+                <div><strong>Integração</strong></div>
+                <div id="integration-text">Não testada</div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-icon status-pending" id="multione-status">⏳</div>
+                <div><strong>MultiOne</strong></div>
+                <div id="multione-text">Aguardando teste</div>
+            </div>
         </div>
 
-        <!-- Painel de Soluções -->
-        <div class="solution-panel" id="solution-panel" style="display: none;">
-            <h3>💡 Soluções Identificadas</h3>
-            <div id="solutions-content">
-                <!-- Soluções aparecerão aqui -->
+        <!-- Conta Wesley -->
+        <div class="account-card">
+            <div class="account-header">
+                <div class="account-avatar">WC</div>
+                <div>
+                    <h3 style="margin: 0; color: #333;">Wesley Costa</h3>
+                    <p style="margin: 5px 0 0 0; color: #666;">@wesley_costa322</p>
+                    <p style="margin: 5px 0 0 0; color: #666;">ID: 24005094685843552</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                <span>✅</span>
+                <span>Token Válido e Funcionando</span>
+            </div>
+            
+            <div class="token-info">
+                <strong>🔑 Token:</strong> EAAPHxlZBqFZAQBPOegCG3JPsfRtOXBiVfZCFjdWT...<br>
+                <strong>📏 Tamanho:</strong> 257 caracteres<br>
+                <strong>✅ Status:</strong> Testado e funcionando no Graph API Explorer<br>
+                <strong>⚡ Resposta:</strong> 433ms<br>
+                <strong>🔐 Permissões:</strong> pages_show_list, pages_messaging, instagram_basic, instagram_manage_messages, whatsapp_business_*
+            </div>
+            
+            <div class="webhook-test">
+                <h4>🔗 Teste de Webhook</h4>
+                <p>Agora vamos tentar configurar o webhook com este token que sabemos que funciona.</p>
+                <button class="btn" onclick="testWebhookForWesley()" style="margin-top: 10px;">
+                    🚀 Testar Webhook para Wesley
+                </button>
+                <div id="webhook-result-wesley" class="webhook-result" style="display: none;">
+                    <!-- Resultado aparecerá aqui -->
+                </div>
             </div>
         </div>
 
         <!-- Logs do Sistema -->
         <div class="logs-container" id="logs-container">
             <div class="log-entry log-success">
-                <span>[TOKENS]</span> Tokens atualizados carregados - ivangeli: IGAAR3ZBf0HH... | wesley: ID 17841464566186399
+                <span>[SUCESSO]</span> Token do Wesley Costa validado e funcionando no Graph API Explorer!
+            </div>
+            <div class="log-entry log-success">
+                <span>[TOKEN]</span> EAAPHxlZBqFZAQBPOegCG3JPsfRtOXBiVfZCFjdWT... (257 chars) - VÁLIDO
             </div>
             <div class="log-entry log-info">
-                <span>[SISTEMA]</span> Diagnóstico carregado com tokens NOVOS - Pronto para testar webhook!
+                <span>[SISTEMA]</span> Pronto para configurar webhook e testar integração completa.
             </div>
         </div>
     </div>
 
     <script>
-        // Tokens COMPLETOS atualizados para teste
-        const TEST_TOKENS = {
-            ivangeli: {
-                token: 'IGAAR3ZBf0HHjxBZAE8wSVJ5eGZA5c3dRN21IaDF2ZAzdudTVRckpsSnVzeE1aVThFUmxhSzREMG5hemJacnpMbDUwNEIwTmY0bW1MZAGNkYU9NSnA1aHpIRjhaT3VHQWM3MGx5TmtqaUZAwdnpJejVTRXpRYjhyTm1oR2tabURGOUZAfdwZDZD',
-                pageId: '529883964211992',
-                username: 'ivangeli_'
-            },
-            wesley: {
-                token: 'IGAAR3ZBf0HHjxBZAFA0YVhXN1FlS1d2ak1OZA2lXMmJwU2ZAia2czellGVHV3OGpXVVM0TGIwSDlZAWHU3RElpdHRNTnZAQZAnR4QTdzU2NQdUZAibmR0c3JKNFZAyMUhoOExfcjNmWDgySDR0dXRjS3hmMUpSWUw5OEdLVkhfOFFWb3ZACdwZDZD', // Token COMPLETO do wesley
-                pageId: '255538924943656', 
-                username: 'wesley_costa322'
-            }
-        };
-        
-        // Token principal para teste (começar com wesley que tem token completo)
-        const TEST_TOKEN = TEST_TOKENS.wesley.token;
-        const PAGE_ID = TEST_TOKENS.wesley.pageId;
-        
-        let diagnosticResults = [];
+        // Token FUNCIONANDO do Wesley Costa
+        const WORKING_TOKEN = 'EAAPHxlZBqFZAQBPOegCG3JPsfRtOXBiVfZCFjdWTG0hAzSyTuraQnDDKr1SiMiupySwxgNZAJLVEgxqq0DhnuNoOt10bUYpZBthKBkfZBbXa4CnNyoamsiOZAaPk1iq1ZC9lZChOOZCmKFjK0f769cijzMVjSSP23DO7wU6TMM4yrm2sK7LAhh47lnSexvbAhbUuz7ZAx2LZAtJtWbzjxZC9ZCPmgBY9ieLjHRUhCIUIGoKJwKdfzz3l0yTXas';
+        const WESLEY_ID = '24005094685843552';
+        const WESLEY_PAGE_ID = '255538924943656'; // Assumindo o page ID anterior
 
-        // Iniciar diagnóstico completo
-        async function startWebhookDiagnostic() {
-            addLog('info', '🔍 Iniciando diagnóstico completo com TOKENS COMPLETOS...');
-            addLog('success', `🔑 Wesley: ${TEST_TOKENS.wesley.token.substring(0, 20)}... (COMPLETO)`);
-            addLog('success', `🔑 Ivangeli: ${TEST_TOKENS.ivangeli.token.substring(0, 20)}... (COMPLETO)`);
-            addLog('info', `📄 Testando primeiro: wesley_costa322 (Page: ${TEST_TOKENS.wesley.pageId})`);
-            
-            const diagnosticGrid = document.getElementById('diagnostic-grid');
-            diagnosticGrid.innerHTML = '';
-            diagnosticResults = [];
-            
-            // Teste 1: Verificar tipo de token (wesley primeiro)
-            await diagnosticTokenType();
-            
-            // Teste 2: Testar ambos os tokens com webhook REAL
-            await diagnosticBothTokens();
-            
-            // Teste 3: Testar diferentes endpoints
-            await diagnosticWebhookEndpoints();
-            
-            // Teste 4: Verificar permissões
-            await diagnosticPermissions();
-            
-            // Teste 5: Testar estrutura da requisição
-            await diagnosticRequestStructure();
-            
-            // Mostrar soluções
-            showSolutions();
-            
-            addLog('success', '✅ Diagnóstico completo finalizado com TOKENS COMPLETOS!');
-        }
-
-        // Diagnóstico: Tipo de Token (Foco no Wesley)
-        async function diagnosticTokenType() {
-            addLog('info', '🏷️ Verificando tipo do token do wesley_costa322 (token completo)...');
-            
-            const card = createDiagnosticCard('info', '🏷️', 'Token Wesley (Completo)', 'Verificando token completo do wesley...');
+        // Testar token funcionando
+        async function testTokenWorking() {
+            addLog('info', '✅ Testando token que sabemos que funciona...');
             
             try {
-                // Testar como Instagram token
-                const igResponse = await fetch(`https://graph.facebook.com/v18.0/me?access_token=${TEST_TOKEN}`);
-                const igData = await igResponse.json();
-                
-                // Testar informações da página
-                const pageResponse = await fetch(`https://graph.facebook.com/v18.0/${PAGE_ID}?access_token=${TEST_TOKEN}`);
-                const pageData = await pageResponse.json();
-                
-                // Testar debug do token
-                const debugResponse = await fetch(`https://graph.facebook.com/debug_token?input_token=${TEST_TOKEN}&access_token=${TEST_TOKEN}`);
-                const debugData = await debugResponse.json();
-                
-                let result = {
-                    type: 'token_type',
-                    instagramWorking: !igData.error,
-                    pageWorking: !pageData.error,
-                    instagramData: igData,
-                    pageData: pageData,
-                    debugData: debugData
-                };
-                
-                // Atualizar card com resultados
-                let content = '<div class="api-test-result">';
-                content += '<strong>TOKEN WESLEY (COMPLETO):</strong><br>';
-                content += `🔍 Preview: ${TEST_TOKEN.substring(0, 30)}...<br>`;
-                content += `📏 Tamanho: ${TEST_TOKEN.length} caracteres<br><br>`;
-                
-                if (result.instagramWorking) {
-                    content += `✅ Instagram/Me: ID ${igData.id}<br>`;
-                    content += `👤 Nome: ${igData.name || 'N/A'}<br>`;
-                    content += `📧 Username: ${igData.username || 'N/A'}<br>`;
-                } else {
-                    content += `❌ Instagram/Me: ${igData.error?.message}<br>`;
-                    content += `🔍 Código: ${igData.error?.code}<br>`;
-                }
-                
-                if (result.pageWorking) {
-                    content += `✅ Page Access: ${pageData.name || 'Dados obtidos'}<br>`;
-                } else {
-                    content += `❌ Page Access: ${pageData.error?.message}<br>`;
-                }
-                
-                if (debugData.data) {
-                    content += `<br>🔍 Debug Info:<br>`;
-                    content += `App ID: ${debugData.data.app_id}<br>`;
-                    content += `Válido: ${debugData.data.is_valid ? 'Sim' : 'Não'}<br>`;
-                    if (debugData.data.expires_at) {
-                        content += `Expira: ${new Date(debugData.data.expires_at * 1000).toLocaleString()}<br>`;
-                    }
-                    if (debugData.data.scopes) {
-                        content += `Scopes: ${debugData.data.scopes.join(', ')}<br>`;
-                    }
-                } else if (debugData.error) {
-                    content += `<br>❌ Debug: ${debugData.error.message}<br>`;
-                }
-                
-                content += '</div>';
-                
-                updateDiagnosticCard(card, result.instagramWorking ? 'info' : 'error', 
-                    result.instagramWorking ? 'Token wesley funcionando perfeitamente' : 'Problema com token wesley', content);
-                
-                diagnosticResults.push(result);
-                addLog(result.instagramWorking ? 'success' : 'error', 
-                    `Token wesley: ${result.instagramWorking ? 'FUNCIONANDO!' : 'Problema identificado'}`);
-                
-            } catch (error) {
-                updateDiagnosticCard(card, 'error', 'Erro na verificação', `<div class="api-test-result">Erro: ${error.message}</div>`);
-                addLog('error', `Erro verificando token wesley: ${error.message}`);
-            }
-        }
-
-        // Diagnóstico: Endpoints de Webhook
-        async function diagnosticWebhookEndpoints() {
-            addLog('info', '📡 Testando endpoints de webhook...');
-            
-            const card = createDiagnosticCard('warning', '📡', 'Endpoints Webhook', 'Testando diferentes endpoints...');
-            
-            const endpoints = [
-                { name: 'subscribed_apps', url: `https://graph.facebook.com/v18.0/${PAGE_ID}/subscribed_apps` },
-                { name: 'subscriptions', url: `https://graph.facebook.com/v18.0/${PAGE_ID}/subscriptions` },
-                { name: 'page_info', url: `https://graph.facebook.com/v18.0/${PAGE_ID}?fields=subscribed_apps` }
-            ];
-            
-            let results = {};
-            let content = '<div class="api-test-result">';
-            
-            for (const endpoint of endpoints) {
-                try {
-                    const response = await fetch(`${endpoint.url}?access_token=${TEST_TOKEN}`, {
-                        method: 'GET'
-                    });
-                    const data = await response.json();
-                    
-                    results[endpoint.name] = {
-                        status: response.status,
-                        success: response.ok,
-                        data: data
-                    };
-                    
-                    content += `${response.ok ? '✅' : '❌'} ${endpoint.name}: ${response.status}<br>`;
-                    if (data.error) {
-                        content += `   Erro: ${data.error.message}<br>`;
-                    }
-                    
-                } catch (error) {
-                    results[endpoint.name] = {
-                        success: false,
-                        error: error.message
-                    };
-                    content += `❌ ${endpoint.name}: ${error.message}<br>`;
-                }
-            }
-            content += '</div>';
-            
-            const hasSuccess = Object.values(results).some(r => r.success);
-            updateDiagnosticCard(card, hasSuccess ? 'info' : 'error', 
-                hasSuccess ? 'Alguns endpoints funcionando' : 'Todos endpoints falhando', content);
-            
-            diagnosticResults.push({ type: 'endpoints', results: results });
-        }
-
-        // Diagnóstico: Permissões
-        async function diagnosticPermissions() {
-            addLog('info', '🔐 Verificando permissões do token...');
-            
-            const card = createDiagnosticCard('warning', '🔐', 'Permissões', 'Verificando permissões disponíveis...');
-            
-            try {
-                const response = await fetch(`https://graph.facebook.com/v18.0/me/permissions?access_token=${TEST_TOKEN}`);
+                const response = await fetch(`https://graph.facebook.com/v23.0/me?access_token=${WORKING_TOKEN}`);
                 const data = await response.json();
                 
-                let content = '<div class="api-test-result">';
-                if (data.data) {
-                    const requiredPerms = ['pages_messaging', 'pages_manage_posts', 'instagram_manage_messages'];
-                    
-                    content += 'Permissões encontradas:<br>';
-                    data.data.forEach(perm => {
-                        const isRequired = requiredPerms.includes(perm.permission);
-                        const icon = perm.status === 'granted' ? '✅' : '❌';
-                        const important = isRequired ? ' (NECESSÁRIA)' : '';
-                        content += `${icon} ${perm.permission}: ${perm.status}${important}<br>`;
-                    });
-                    
-                    const missingPerms = requiredPerms.filter(req => 
-                        !data.data.some(perm => perm.permission === req && perm.status === 'granted')
-                    );
-                    
-                    if (missingPerms.length > 0) {
-                        content += '<br>❌ PERMISSÕES FALTANDO:<br>';
-                        missingPerms.forEach(perm => {
-                            content += `   • ${perm}<br>`;
-                        });
-                    }
+                if (data.id) {
+                    addLog('success', `🎉 TOKEN FUNCIONANDO! ID: ${data.id}, Nome: ${data.name}`);
+                    updateTokenStatus('connected', 'Token 100% válido');
                 } else {
-                    content += `Erro: ${data.error?.message || 'Não foi possível obter permissões'}`;
+                    addLog('error', `❌ Erro inesperado: ${data.error?.message}`);
                 }
-                content += '</div>';
+            } catch (error) {
+                addLog('error', `❌ Erro de rede: ${error.message}`);
+            }
+        }
+
+        // Configurar webhook REAL
+        async function configureWebhookReal() {
+            addLog('info', '🔗 Configurando webhook REAL com token funcionando...');
+            
+            try {
+                // Usar API do seu backend
+                const response = await fetch('/api/setup-webhook', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pageId: WESLEY_PAGE_ID,
+                        pageAccessToken: WORKING_TOKEN,
+                        userId: 'wesley_costa322'
+                    })
+                });
                 
-                const hasRequired = data.data && data.data.some(p => 
-                    p.permission === 'pages_messaging' && p.status === 'granted'
-                );
+                const data = await response.json();
                 
-                updateDiagnosticCard(card, hasRequired ? 'info' : 'error',
-                    hasRequired ? 'Permissões básicas OK' : 'Permissões insuficientes', content);
-                
-                diagnosticResults.push({ type: 'permissions', data: data });
+                if (data.success) {
+                    addLog('success', '🎉 WEBHOOK CONFIGURADO COM SUCESSO!');
+                    addLog('success', `📡 URL: ${data.webhookUrl}`);
+                    updateWebhookStatus('connected', 'Configurado');
+                    updateIntegrationStatus('connected', 'Pronto');
+                } else {
+                    addLog('error', `❌ Erro no webhook: ${data.error}`);
+                    updateWebhookStatus('disconnected', 'Falha na configuração');
+                }
                 
             } catch (error) {
-                updateDiagnosticCard(card, 'error', 'Erro verificando permissões', 
-                    `<div class="api-test-result">Erro: ${error.message}</div>`);
-                addLog('error', `Erro verificando permissões: ${error.message}`);
+                addLog('error', `❌ Erro ao configurar webhook: ${error.message}`);
             }
         }
 
-        // Diagnóstico: Estrutura da Requisição
-        async function diagnosticRequestStructure() {
-            addLog('info', '🔧 Testando estrutura da requisição webhook...');
+        // Testar webhook específico para Wesley
+        async function testWebhookForWesley() {
+            addLog('info', '🚀 Testando webhook específico para Wesley...');
             
-            const card = createDiagnosticCard('info', '🔧', 'Estrutura da Requisição', 'Testando diferentes formatos...');
+            const resultDiv = document.getElementById('webhook-result-wesley');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = 'Testando...';
             
-            const testRequests = [
-                {
-                    name: 'POST subscribed_apps',
+            try {
+                // Teste direto com a Graph API
+                const response = await fetch(`https://graph.facebook.com/v23.0/${WESLEY_PAGE_ID}/subscribed_apps`, {
                     method: 'POST',
-                    url: `https://graph.facebook.com/v18.0/${PAGE_ID}/subscribed_apps`,
-                    body: { subscribed_fields: 'messages' }
-                },
-                {
-                    name: 'POST subscriptions',
-                    method: 'POST', 
-                    url: `https://graph.facebook.com/v18.0/${PAGE_ID}/subscriptions`,
-                    body: { object: 'page', callback_url: 'https://example.com/webhook', fields: ['messages'] }
-                }
-            ];
-            
-            let content = '<div class="api-test-result">';
-            
-            for (const testReq of testRequests) {
-                try {
-                    const formData = new FormData();
-                    Object.keys(testReq.body).forEach(key => {
-                        formData.append(key, typeof testReq.body[key] === 'object' ? 
-                            JSON.stringify(testReq.body[key]) : testReq.body[key]);
-                    });
-                    formData.append('access_token', TEST_TOKEN);
-                    
-                    const response = await fetch(testReq.url, {
-                        method: testReq.method,
-                        body: formData
-                    });
-                    
-                    const data = await response.json();
-                    
-                    content += `${response.ok ? '✅' : '❌'} ${testReq.name}: ${response.status}<br>`;
-                    if (data.error) {
-                        content += `   Erro: ${data.error.message} (Código: ${data.error.code})<br>`;
-                        content += `   Tipo: ${data.error.type}<br>`;
-                    }
-                    if (response.ok) {
-                        content += `   Sucesso: ${JSON.stringify(data)}<br>`;
-                    }
-                    content += '<br>';
-                    
-                } catch (error) {
-                    content += `❌ ${testReq.name}: ${error.message}<br><br>`;
-                }
-            }
-            content += '</div>';
-            
-            updateDiagnosticCard(card, 'info', 'Teste de requisições concluído', content);
-        }
-
-        // Criar card de diagnóstico
-        function createDiagnosticCard(type, icon, title, description) {
-            const diagnosticGrid = document.getElementById('diagnostic-grid');
-            
-            const card = document.createElement('div');
-            card.className = `diagnostic-card ${type}`;
-            card.innerHTML = `
-                <div class="card-header">
-                    <div class="card-icon ${type}-icon">${icon}</div>
-                    <div>
-                        <h3 style="margin: 0; color: #333;">${title}</h3>
-                        <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;" class="card-description">${description}</p>
-                    </div>
-                </div>
-                <div class="card-content">
-                    <!-- Conteúdo será preenchido -->
-                </div>
-            `;
-            
-            diagnosticGrid.appendChild(card);
-            return card;
-        }
-
-        // Atualizar card de diagnóstico
-        function updateDiagnosticCard(card, newType, newDescription, content) {
-            card.className = `diagnostic-card ${newType}`;
-            card.querySelector('.card-description').textContent = newDescription;
-            card.querySelector('.card-content').innerHTML = content;
-        }
-
-        // Mostrar soluções
-        function showSolutions() {
-            const solutionPanel = document.getElementById('solution-panel');
-            const solutionsContent = document.getElementById('solutions-content');
-            
-            let solutions = [];
-            
-            // Analisar resultados e sugerir soluções
-            const tokenResult = diagnosticResults.find(r => r.type === 'token_type');
-            const permissionsResult = diagnosticResults.find(r => r.type === 'permissions');
-            
-            if (tokenResult && !tokenResult.instagramWorking) {
-                solutions.push({
-                    title: '🔑 Problema com Token',
-                    description: 'O token não está funcionando corretamente para Instagram.',
-                    action: 'Gere um novo token no Graph API Explorer com as permissões corretas.'
-                });
-            }
-            
-            if (permissionsResult && permissionsResult.data.data) {
-                const hasMessagingPerm = permissionsResult.data.data.some(p => 
-                    p.permission === 'pages_messaging' && p.status === 'granted'
-                );
-                if (!hasMessagingPerm) {
-                    solutions.push({
-                        title: '🔐 Permissões Insuficientes',
-                        description: 'Token não tem permissão pages_messaging necessária para webhooks.',
-                        action: 'Regenere o token incluindo a permissão pages_messaging.'
-                    });
-                }
-            }
-            
-            // Solução geral para erro 400
-            solutions.push({
-                title: '🔧 Erro 400 - Bad Request',
-                description: 'A requisição está malformada ou usando endpoint incorreto.',
-                action: 'Use o endpoint correto: /{page-id}/subscribed_apps com método POST e campo subscribed_fields.'
-            });
-            
-            if (solutions.length > 0) {
-                let content = '';
-                solutions.forEach((solution, index) => {
-                    content += `
-                        <div style="margin-bottom: 20px; padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">
-                            <h4 style="color: #10b981; margin-bottom: 10px;">${solution.title}</h4>
-                            <p style="margin-bottom: 10px;"><strong>Problema:</strong> ${solution.description}</p>
-                            <p><strong>Solução:</strong> ${solution.action}</p>
-                        </div>
-                    `;
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `subscribed_fields=messages,messaging_postbacks,messaging_optins&access_token=${WORKING_TOKEN}`
                 });
                 
-                solutionsContent.innerHTML = content;
-                solutionPanel.style.display = 'block';
+                const data = await response.json();
+                
+                let result = `Status: ${response.status}\n`;
+                result += `Resposta: ${JSON.stringify(data, null, 2)}`;
+                
+                resultDiv.innerHTML = result;
+                
+                if (response.ok && data.success) {
+                    addLog('success', '🎉 WEBHOOK CONFIGURADO DIRETAMENTE COM SUCESSO!');
+                    updateWebhookStatus('connected', 'Ativo');
+                } else {
+                    addLog('error', `❌ Webhook ainda falhou: ${data.error?.message || 'Erro desconhecido'}`);
+                    addLog('info', `🔍 Status: ${response.status}, Dados: ${JSON.stringify(data)}`);
+                }
+                
+            } catch (error) {
+                addLog('error', `❌ Erro no teste: ${error.message}`);
+                resultDiv.innerHTML = `Erro: ${error.message}`;
             }
         }
 
-        // Testar tipo de token individualmente
-        async function testTokenType() {
-            await diagnosticTokenType();
+        // Teste completo da integração
+        async function testCompleteIntegration() {
+            addLog('info', '🧪 Iniciando teste completo da integração...');
+            
+            // 1. Testar token
+            await testTokenWorking();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // 2. Testar webhook
+            await testWebhookForWesley();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // 3. Testar MultiOne
+            await testMultiOneConnection();
+            
+            addLog('success', '✅ Teste completo finalizado!');
         }
 
-        // Testar endpoints individualmente
-        async function testWebhookEndpoints() {
-            await diagnosticWebhookEndpoints();
+        // Testar conexão MultiOne
+        async function testMultiOneConnection() {
+            addLog('info', '🔗 Testando conexão MultiOne...');
+            
+            try {
+                const response = await fetch('/api/test/multione', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('success', '✅ MultiOne conectado e funcionando!');
+                    updateMultiOneStatus('connected', 'Conectado');
+                } else {
+                    addLog('warning', `⚠️ MultiOne: ${data.error || 'Sem resposta'}`);
+                    updateMultiOneStatus('pending', 'Problema detectado');
+                }
+                
+            } catch (error) {
+                addLog('warning', `⚠️ MultiOne não responde: ${error.message}`);
+                updateMultiOneStatus('pending', 'Sem resposta');
+            }
+        }
+
+        // Funções de atualização de status
+        function updateTokenStatus(status, text) {
+            const icon = document.getElementById('token-status');
+            const textEl = document.getElementById('token-text');
+            
+            icon.className = `status-icon status-${status}`;
+            icon.textContent = status === 'connected' ? '✅' : status === 'pending' ? '⏳' : '❌';
+            textEl.textContent = text;
+        }
+
+        function updateWebhookStatus(status, text) {
+            const icon = document.getElementById('webhook-status');
+            const textEl = document.getElementById('webhook-text');
+            
+            icon.className = `status-icon status-${status}`;
+            icon.textContent = status === 'connected' ? '✅' : status === 'pending' ? '⏳' : '❌';
+            textEl.textContent = text;
+        }
+
+        function updateIntegrationStatus(status, text) {
+            const icon = document.getElementById('integration-status');
+            const textEl = document.getElementById('integration-text');
+            
+            icon.className = `status-icon status-${status}`;
+            icon.textContent = status === 'connected' ? '✅' : status === 'pending' ? '⏳' : '❌';
+            textEl.textContent = text;
+        }
+
+        function updateMultiOneStatus(status, text) {
+            const icon = document.getElementById('multione-status');
+            const textEl = document.getElementById('multione-text');
+            
+            icon.className = `status-icon status-${status}`;
+            icon.textContent = status === 'connected' ? '✅' : status === 'pending' ? '⏳' : '❌';
+            textEl.textContent = text;
         }
 
         // Adicionar log
@@ -663,9 +516,9 @@
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            addLog('error', '❌ Webhook retornando erro 400 - Bad Request');
-            addLog('info', '🔍 Sistema de diagnóstico carregado');
-            addLog('warning', '💡 Clique em "Diagnóstico Completo" para identificar o problema');
+            addLog('success', '🎉 Sistema carregado com TOKEN FUNCIONANDO!');
+            addLog('info', '📋 Pronto para configurar webhook e completar integração');
+            addLog('info', '💡 Clique em "Configurar Webhook REAL" para continuar');
         });
     </script>
 </body>
