@@ -16,8 +16,8 @@ const CONFIG = {
     multioneToken: process.env.MULTIONE_TOKEN || '68eff5505a3989e99dadbc7243c9411efba9a80ef1f59e4680c89678bf63f515',
     multioneApiUrl: process.env.MULTIONE_API_URL || 'https://sock.multi360.digital/api/messages/send',
     baseUrl: process.env.BASE_URL || 'https://instagram-oauth-multione-production.up.railway.app',
-    // Token da página específica "Teste instagram"
-    instagramPageToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || 'EAAPHxlZBqFZAQBPMl9CloAIEm0gxKilWMWxbh01ZBkZC9zLvzADAtZBO9LsibIZCbqmYErMyuQFs2Mg2KxbZAtm1tqnjXEVCPZCPiZBGPQL6pa7Yn266bJMxo2FZCUGSxXXcGEsFeZBjEEKDheBiL5pymiLtNLmKneh7MZBJ9YCSPzkmjc3dFMs3dKWqeepYaWeTJb1PSYUt9v5Xks0ypB8CYAzKUDMOUD2ave0g1afp0StPpPIMd9PKJaqjfz2NArwZD',
+    // Token da página específica "Teste instagram" - ATUALIZADO
+    instagramPageToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || 'EAAPHxlZBqFZAQBPImNtaCXLpMhd7GSO6v6qZCpJfj0ZBeZAFSdyLIplxRk48knmjYiZB0AuLe7CFWmvu8NefICPZB3TZCxuizQZCqZAIjI9Xaiv5bltDGFkexVSEZBBw49cXA3cTsfCywiHoq9fAXvHzzYe2hdJLeljCXLfkk4MZArpJ0RZBTUyFT4Kxs9Gofpd0855jXiCSf66FyOxilNNTHdWxEs0hGmM4ZCKUvNZCCrFfcfAGzZA2vodq4knWkgZDZD',
     // Configurações do Polling
     pollingEnabled: process.env.POLLING_ENABLED !== 'false', // true por padrão
     pollingInterval: parseInt(process.env.POLLING_INTERVAL) || 120000, // 2 minutos
@@ -150,15 +150,39 @@ async function pollInstagramMessages() {
 // Buscar conversas do Instagram
 async function getInstagramConversations() {
     try {
-        const response = await axios.get(
-            `https://graph.facebook.com/v18.0/${CONFIG.instagramBusinessAccountId}/conversations`,
-            {
-                params: {
-                    access_token: CONFIG.instagramPageToken,
-                    fields: 'id,updated_time,participants'
+        console.log(`🔍 [POLLING] Tentando buscar conversas...`);
+        console.log(`📊 [POLLING] Instagram Business ID: ${CONFIG.instagramBusinessAccountId}`);
+        console.log(`📄 [POLLING] Página ID: 752860274568592`);
+        
+        // Tentar primeiro com Instagram Business Account
+        let response;
+        try {
+            response = await axios.get(
+                `https://graph.facebook.com/v18.0/${CONFIG.instagramBusinessAccountId}/conversations`,
+                {
+                    params: {
+                        access_token: CONFIG.instagramPageToken,
+                        fields: 'id,updated_time,participants'
+                    }
                 }
-            }
-        );
+            );
+            console.log(`✅ [POLLING] Sucesso com Instagram Business Account`);
+        } catch (error) {
+            console.log(`⚠️ [POLLING] Falha com Instagram Business, tentando com página...`);
+            console.log(`❌ [POLLING] Erro: ${error.response?.data?.error?.message || error.message}`);
+            
+            // Tentar com ID da página
+            response = await axios.get(
+                `https://graph.facebook.com/v18.0/752860274568592/conversations`,
+                {
+                    params: {
+                        access_token: CONFIG.instagramPageToken,
+                        fields: 'id,updated_time,participants'
+                    }
+                }
+            );
+            console.log(`✅ [POLLING] Sucesso com ID da página`);
+        }
 
         return response.data.data || [];
     } catch (error) {
