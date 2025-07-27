@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔍 Debug Polling Instagram</title>
+    <title>🔍 Debug Completo Instagram</title>
     <style>
         * {
             margin: 0;
@@ -13,13 +13,13 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c);
+            background: linear-gradient(135deg, #7c2d12, #991b1b, #7f1d1d);
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
@@ -32,29 +32,34 @@
             text-align: center;
             margin-bottom: 30px;
             padding: 25px;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, #7c2d12, #991b1b);
             color: white;
             border-radius: 15px;
         }
 
-        .debug-section {
+        .debug-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .debug-card {
             background: white;
             border-radius: 15px;
             padding: 25px;
-            margin: 20px 0;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-left: 5px solid #ef4444;
+            border-left: 5px solid #7c2d12;
         }
 
         .btn {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, #7c2d12, #991b1b);
             color: white;
             border: none;
             padding: 15px 25px;
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             width: 100%;
             margin: 10px 0;
             font-size: 1rem;
@@ -62,11 +67,7 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 5px 15px rgba(124, 45, 18, 0.4);
         }
 
         .result-box {
@@ -75,244 +76,303 @@
             padding: 20px;
             margin: 15px 0;
             font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             max-height: 400px;
             overflow-y: auto;
-            border-left: 4px solid #ef4444;
+            border-left: 4px solid #7c2d12;
             display: none;
         }
 
-        .problem-box {
+        .step-title {
+            color: #7c2d12;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .live-logs {
+            background: #1f2937;
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            grid-column: 1 / -1;
+        }
+
+        .logs-container {
+            background: #111827;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .log-error { background: rgba(248, 113, 113, 0.2); color: #fca5a5; }
+        .log-success { background: rgba(52, 211, 153, 0.2); color: #6ee7b7; }
+        .log-info { background: rgba(96, 165, 250, 0.2); color: #93c5fd; }
+
+        .critical-info {
             background: #fef2f2;
             border: 2px solid #ef4444;
             border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
-        }
-
-        .solution-box {
-            background: #ecfdf5;
-            border: 2px solid #10b981;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
+            grid-column: 1 / -1;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔍 Debug Polling Instagram</h1>
-            <p>Identificando por que não encontra conversas</p>
+            <h1>🔍 Debug Completo Instagram</h1>
+            <p>Vamos rastrear exatamente onde está o problema!</p>
         </div>
 
-        <div class="problem-box">
-            <h3 style="color: #ef4444; margin-bottom: 15px;">🚨 PROBLEMA IDENTIFICADO</h3>
-            <p><strong>Status:</strong> "📭 [POLLING] Nenhuma conversa encontrada"</p>
-            <p><strong>Causa:</strong> Instagram Business Account ID incorreto ou token sem permissões</p>
+        <div class="critical-info">
+            <h3 style="color: #ef4444; margin-bottom: 15px;">🎯 OBJETIVO DO DEBUG</h3>
+            <p>Identificar exatamente por que as mensagens não estão sendo processadas pelo polling, mesmo com token e IDs corretos.</p>
         </div>
 
-        <div class="debug-section">
-            <h3 style="color: #ef4444; margin-bottom: 15px;">1. 🔍 Verificar Token e Permissões</h3>
-            <button class="btn" onclick="debugToken()">
-                🔑 Debug Token Instagram
-            </button>
-            <div class="result-box" id="token-result">
-                Aguardando verificação...
+        <div class="debug-grid">
+            <!-- 1. Verificar Logs do Sistema -->
+            <div class="debug-card">
+                <div class="step-title">1. 📋 Logs do Sistema</div>
+                <p>Verificar logs detalhados do polling</p>
+                <button class="btn" onclick="checkSystemLogs()">
+                    📋 Verificar Logs
+                </button>
+                <div class="result-box" id="logs-result">
+                    Carregando logs...
+                </div>
+            </div>
+
+            <!-- 2. Testar API Conversas -->
+            <div class="debug-card">
+                <div class="step-title">2. 🔗 API Conversas</div>
+                <p>Testar diretamente a API de conversas</p>
+                <button class="btn" onclick="testConversationsAPI()">
+                    🧪 Testar API
+                </button>
+                <div class="result-box" id="api-result">
+                    Aguardando teste...
+                </div>
+            </div>
+
+            <!-- 3. Testar API Mensagens -->
+            <div class="debug-card">
+                <div class="step-title">3. 💬 API Mensagens</div>
+                <p>Testar API de mensagens de uma conversa</p>
+                <button class="btn" onclick="testMessagesAPI()">
+                    📨 Testar Mensagens
+                </button>
+                <div class="result-box" id="messages-result">
+                    Aguardando teste...
+                </div>
+            </div>
+
+            <!-- 4. Forçar Polling -->
+            <div class="debug-card">
+                <div class="step-title">4. ⚡ Polling Forçado</div>
+                <p>Executar polling manual e monitorar</p>
+                <button class="btn" onclick="forcePoll()">
+                    🚀 Forçar Polling
+                </button>
+                <div class="result-box" id="poll-result">
+                    Aguardando execução...
+                </div>
+            </div>
+
+            <!-- 5. Verificar MultiOne -->
+            <div class="debug-card">
+                <div class="step-title">5. 🎯 Teste MultiOne</div>
+                <p>Verificar se MultiOne recebe dados</p>
+                <button class="btn" onclick="testMultiOne()">
+                    📤 Testar MultiOne
+                </button>
+                <div class="result-box" id="multione-result">
+                    Aguardando teste...
+                </div>
+            </div>
+
+            <!-- 6. Debug Completo -->
+            <div class="debug-card">
+                <div class="step-title">6. 🔬 Debug Completo</div>
+                <p>Executar sequência completa de debug</p>
+                <button class="btn" onclick="fullDebug()">
+                    🔬 Debug Completo
+                </button>
+                <div class="result-box" id="debug-result">
+                    Aguardando debug...
+                </div>
             </div>
         </div>
 
-        <div class="debug-section">
-            <h3 style="color: #ef4444; margin-bottom: 15px;">2. 📱 Encontrar Instagram Business Account ID Correto</h3>
-            <button class="btn" onclick="findBusinessAccount()">
-                📊 Buscar Business Account
+        <!-- Live Logs -->
+        <div class="live-logs">
+            <h3 style="margin-bottom: 15px;">📊 Logs em Tempo Real</h3>
+            <button class="btn" onclick="startLiveMonitor()" style="background: #059669; margin-bottom: 15px;">
+                🔄 Iniciar Monitor
             </button>
-            <div class="result-box" id="account-result">
-                Aguardando busca...
+            <div class="logs-container" id="live-logs">
+                <div class="log-entry log-info">[DEBUG] Sistema carregado - pronto para debug completo</div>
             </div>
-        </div>
-
-        <div class="debug-section">
-            <h3 style="color: #ef4444; margin-bottom: 15px;">3. 💬 Testar API de Conversas</h3>
-            <button class="btn" onclick="testConversationsAPI()">
-                🧪 Testar Conversas API
-            </button>
-            <div class="result-box" id="conversations-result">
-                Aguardando teste...
-            </div>
-        </div>
-
-        <div class="debug-section">
-            <h3 style="color: #ef4444; margin-bottom: 15px;">4. 🔄 Forçar Polling Manual</h3>
-            <button class="btn btn-success" onclick="forcePoll()">
-                ⚡ Polling Manual AGORA
-            </button>
-            <div class="result-box" id="poll-result">
-                Aguardando polling...
-            </div>
-        </div>
-
-        <div class="solution-box">
-            <h3 style="color: #10b981; margin-bottom: 15px;">💡 SOLUÇÕES POSSÍVEIS</h3>
-            <ol style="line-height: 1.8; margin-left: 20px;">
-                <li><strong>Token Incorreto:</strong> Gerar novo token com permissões corretas</li>
-                <li><strong>Business Account ID:</strong> Usar ID correto da conta Instagram Business</li>
-                <li><strong>Permissões:</strong> Token precisa de instagram_basic + instagram_manage_messages</li>
-                <li><strong>Conta Tipo:</strong> Precisa ser Instagram Business ou Creator Account</li>
-            </ol>
         </div>
     </div>
 
     <script>
         const BACKEND_URL = 'https://instagram-oauth-multione-production.up.railway.app';
+        let monitorInterval = null;
 
-        // Debug do token
-        async function debugToken() {
-            updateResult('token-result', '🔑 Verificando token e permissões...');
+        // 1. Verificar logs do sistema
+        async function checkSystemLogs() {
+            updateResult('logs-result', '📋 Carregando logs do sistema...');
             
             try {
-                // Primeiro verificar se o token está funcionando
-                const testUrl = 'https://graph.facebook.com/v18.0/me?access_token=EAAPHxlZBqFZAQBPMiCnZBvd54GWFFRm1ZCBtodu2mkCjEm0qnUzZAPfzj21pHZAAwX5gW3C92DEkZAPRq1OHx2B7QY8YFhZAoabuHCVnNniZBZB0XV6k6qQYJ4EqxCvioudZAWDzEdSozgnrzPYUozYa3RsUmaRsCsYWnsmCgLlRpcN9Gs9Of8ma8gYrUV5kGFHJbITY8dhD9yVcay4XoR5UUScVF3XApBiyZCqZBgc9qaAusOUQ4ZCzd3OfcToAZDZD&fields=id,name,accounts';
-                
-                const response = await fetch(testUrl);
+                const response = await fetch(`${BACKEND_URL}/api/logs`);
                 const data = await response.json();
 
-                if (response.ok) {
-                    let result = `🔑 TOKEN VÁLIDO:
+                if (data.logs && data.logs.length > 0) {
+                    let result = `📋 LOGS RECENTES (${data.logs.length} entradas):\n\n`;
+                    
+                    // Mostrar logs relevantes ao polling
+                    const pollingLogs = data.logs.filter(log => 
+                        log.message.includes('[POLLING]') || 
+                        log.message.includes('conversa') ||
+                        log.message.includes('mensagem') ||
+                        log.message.includes('MultiOne')
+                    ).slice(0, 10);
 
-📊 Usuário: ${data.name || 'N/A'}
-🆔 ID: ${data.id || 'N/A'}
-
-📱 PÁGINAS CONECTADAS:`;
-
-                    if (data.accounts && data.accounts.data) {
-                        data.accounts.data.forEach((page, index) => {
-                            result += `\n${index + 1}. ${page.name} (ID: ${page.id})`;
+                    if (pollingLogs.length > 0) {
+                        result += `🔍 LOGS DE POLLING:\n`;
+                        pollingLogs.forEach(log => {
+                            const time = new Date(log.timestamp).toLocaleTimeString();
+                            result += `[${time}] ${log.message}\n`;
                         });
                     } else {
-                        result += '\n❌ Nenhuma página encontrada';
+                        result += `⚠️ Nenhum log de polling encontrado nos últimos registros.\n`;
+                        result += `\n📋 ÚLTIMOS 5 LOGS GERAIS:\n`;
+                        data.logs.slice(0, 5).forEach(log => {
+                            const time = new Date(log.timestamp).toLocaleTimeString();
+                            result += `[${time}] ${log.message}\n`;
+                        });
                     }
 
-                    updateResult('token-result', result);
+                    updateResult('logs-result', result);
                 } else {
-                    updateResult('token-result', `❌ TOKEN INVÁLIDO:
-
-Erro: ${data.error?.message || 'Token expirado ou inválido'}
-Código: ${data.error?.code || response.status}
-
-💡 SOLUÇÃO: Gerar novo token no Graph API Explorer`);
+                    updateResult('logs-result', '❌ Nenhum log encontrado ou erro ao carregar');
                 }
 
             } catch (error) {
-                updateResult('token-result', `❌ Erro ao verificar token: ${error.message}`);
+                updateResult('logs-result', `❌ Erro ao carregar logs: ${error.message}`);
             }
         }
 
-        // Buscar Business Account correto
-        async function findBusinessAccount() {
-            updateResult('account-result', '📱 Buscando Instagram Business Account...');
-            
-            try {
-                // Buscar páginas do usuário
-                const pagesUrl = 'https://graph.facebook.com/v18.0/me/accounts?access_token=EAAPHxlZBqFZAQBPMiCnZBvd54GWFFRm1ZCBtodu2mkCjEm0qnUzZAPfzj21pHZAAwX5gW3C92DEkZAPRq1OHx2B7QY8YFhZAoabuHCVnNniZBZB0XV6k6qQYJ4EqxCvioudZAWDzEdSozgnrzPYUozYa3RsUmaRsCsYWnsmCgLlRpcN9Gs9Of8ma8gYrUV5kGFHJbITY8dhD9yVcay4XoR5UUScVF3XApBiyZCqZBgc9qaAusOUQ4ZCzd3OfcToAZDZD';
-                
-                const pagesResponse = await fetch(pagesUrl);
-                const pagesData = await pagesResponse.json();
-
-                if (!pagesResponse.ok) {
-                    updateResult('account-result', `❌ Erro ao buscar páginas: ${pagesData.error?.message}`);
-                    return;
-                }
-
-                let result = `📱 PÁGINAS ENCONTRADAS:\n\n`;
-
-                if (pagesData.data && pagesData.data.length > 0) {
-                    for (let i = 0; i < pagesData.data.length; i++) {
-                        const page = pagesData.data[i];
-                        result += `${i + 1}. 📄 ${page.name}\n`;
-                        result += `   🆔 Page ID: ${page.id}\n`;
-
-                        // Verificar se tem Instagram conectado
-                        try {
-                            const igUrl = `https://graph.facebook.com/v18.0/${page.id}?access_token=${page.access_token}&fields=instagram_business_account`;
-                            const igResponse = await fetch(igUrl);
-                            const igData = await igResponse.json();
-
-                            if (igData.instagram_business_account) {
-                                result += `   ✅ Instagram: ${igData.instagram_business_account.id}\n`;
-                                result += `   📸 ESTE É O ID CORRETO! ^^^^^^^^^\n`;
-                            } else {
-                                result += `   ❌ Instagram: Não conectado\n`;
-                            }
-                        } catch (error) {
-                            result += `   ⚠️ Instagram: Erro ao verificar\n`;
-                        }
-                        result += `\n`;
-                    }
-                } else {
-                    result += `❌ Nenhuma página encontrada\n\n`;
-                }
-
-                result += `💡 ATUAL NO SISTEMA: 17841400008460056\n`;
-                result += `🔍 VERIFIQUE: Se o ID acima é diferente, atualize no código!`;
-
-                updateResult('account-result', result);
-
-            } catch (error) {
-                updateResult('account-result', `❌ Erro ao buscar Business Account: ${error.message}`);
-            }
-        }
-
-        // Testar API de conversas
+        // 2. Testar API de conversas
         async function testConversationsAPI() {
-            updateResult('conversations-result', '💬 Testando API de conversas...');
+            updateResult('api-result', '🔗 Testando API de conversas...');
+            
+            const token = 'EAAPHxlZBqFZAQBPMl9CloAIEm0gxKilWMWxbh01ZBkZC9zLvzADAtZBO9LsibIZCbqmYErMyuQFs2Mg2KxbZAtm1tqnjXEVCPZCPiZBGPQL6pa7Yn266bJMxo2FZCUGSxXXcGEsFeZBjEEKDheBiL5pymiLtNLmKneh7MZBJ9YCSPzkmjc3dFMs3dKWqeepYaWeTJb1PSYUt9v5Xks0ypB8CYAzKUDMOUD2ave0g1afp0StPpPIMd9PKJaqjfz2NArwZD';
+            
+            let result = `🔗 TESTE API CONVERSAS:\n\n`;
+
+            // Testar diferentes endpoints
+            const endpoints = [
+                { name: 'Instagram Business', id: '17841464566186399' },
+                { name: 'Página Facebook', id: '752860274568592' }
+            ];
+
+            for (const endpoint of endpoints) {
+                try {
+                    result += `🧪 Testando: ${endpoint.name} (${endpoint.id})\n`;
+                    
+                    const url = `https://graph.facebook.com/v18.0/${endpoint.id}/conversations?access_token=${token}&fields=id,updated_time,participants&limit=10`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (response.ok && data.data) {
+                        result += `✅ SUCESSO: ${data.data.length} conversas encontradas\n`;
+                        if (data.data.length > 0) {
+                            result += `📊 Primeira conversa: ${data.data[0].id}\n`;
+                            result += `⏰ Atualizada: ${data.data[0].updated_time}\n`;
+                        }
+                    } else {
+                        result += `❌ ERRO: ${data.error?.message || 'Resposta inválida'}\n`;
+                        result += `📊 Código: ${data.error?.code || response.status}\n`;
+                    }
+                } catch (error) {
+                    result += `❌ EXCEÇÃO: ${error.message}\n`;
+                }
+                result += `\n`;
+            }
+
+            updateResult('api-result', result);
+        }
+
+        // 3. Testar API de mensagens
+        async function testMessagesAPI() {
+            updateResult('messages-result', '💬 Testando API de mensagens...');
+            
+            // Primeiro, tentar obter uma conversa
+            const token = 'EAAPHxlZBqFZAQBPMl9CloAIEm0gxKilWMWxbh01ZBkZC9zLvzADAtZBO9LsibIZCbqmYErMyuQFs2Mg2KxbZAtm1tqnjXEVCPZCPiZBGPQL6pa7Yn266bJMxo2FZCUGSxXXcGEsFeZBjEEKDheBiL5pymiLtNLmKneh7MZBJ9YCSPzkmjc3dFMs3dKWqeepYaWeTJb1PSYUt9v5Xks0ypB8CYAzKUDMOUD2ave0g1afp0StPpPIMd9PKJaqjfz2NArwZD';
             
             try {
-                // Testar com diferentes IDs
-                const idsToTest = [
-                    '17841400008460056', // ID atual
-                    '752860274568592'    // ID da página
-                ];
+                // Buscar conversas primeiro
+                let conversationsUrl = `https://graph.facebook.com/v18.0/752860274568592/conversations?access_token=${token}&limit=5`;
+                let response = await fetch(conversationsUrl);
+                let data = await response.json();
 
-                let result = `💬 TESTANDO API DE CONVERSAS:\n\n`;
+                let result = `💬 TESTE API MENSAGENS:\n\n`;
 
-                for (const id of idsToTest) {
-                    result += `🔍 Testando ID: ${id}\n`;
+                if (response.ok && data.data && data.data.length > 0) {
+                    result += `✅ ${data.data.length} conversas encontradas\n\n`;
                     
-                    try {
-                        const conversationsUrl = `https://graph.facebook.com/v18.0/${id}/conversations?access_token=EAAPHxlZBqFZAQBPMiCnZBvd54GWFFRm1ZCBtodu2mkCjEm0qnUzZAPfzj21pHZAAwX5gW3C92DEkZAPRq1OHx2B7QY8YFhZAoabuHCVnNniZBZB0XV6k6qQYJ4EqxCvioudZAWDzEdSozgnrzPYUozYa3RsUmaRsCsYWnsmCgLlRpcN9Gs9Of8ma8gYrUV5kGFHJbITY8dhD9yVcay4XoR5UUScVF3XApBiyZCqZBgc9qaAusOUQ4ZCzd3OfcToAZDZD&fields=id,updated_time,participants`;
-                        
-                        const response = await fetch(conversationsUrl);
-                        const data = await response.json();
+                    // Testar mensagens da primeira conversa
+                    const conversationId = data.data[0].id;
+                    result += `🔍 Testando mensagens da conversa: ${conversationId}\n`;
+                    
+                    const messagesUrl = `https://graph.facebook.com/v18.0/${conversationId}/messages?access_token=${token}&fields=id,created_time,from,to,message&limit=10`;
+                    const messagesResponse = await fetch(messagesUrl);
+                    const messagesData = await messagesResponse.json();
 
-                        if (response.ok && data.data) {
-                            result += `✅ FUNCIONOU! ${data.data.length} conversas encontradas\n`;
-                            if (data.data.length > 0) {
-                                result += `📊 Primeira conversa: ${data.data[0].id}\n`;
-                                result += `⏰ Atualizada: ${data.data[0].updated_time}\n`;
-                            }
-                            result += `🎯 USE ESTE ID: ${id}\n`;
-                        } else {
-                            result += `❌ Erro: ${data.error?.message || 'Sem conversas'}\n`;
+                    if (messagesResponse.ok && messagesData.data) {
+                        result += `✅ ${messagesData.data.length} mensagens encontradas\n\n`;
+                        
+                        if (messagesData.data.length > 0) {
+                            result += `📨 ÚLTIMA MENSAGEM:\n`;
+                            const lastMessage = messagesData.data[0];
+                            result += `🆔 ID: ${lastMessage.id}\n`;
+                            result += `⏰ Data: ${lastMessage.created_time}\n`;
+                            result += `👤 De: ${lastMessage.from?.id || 'N/A'}\n`;
+                            result += `📝 Texto: ${lastMessage.message?.text || 'Sem texto'}\n`;
                         }
-                    } catch (error) {
-                        result += `❌ Erro: ${error.message}\n`;
+                    } else {
+                        result += `❌ Erro ao buscar mensagens: ${messagesData.error?.message}\n`;
                     }
-                    result += `\n`;
+                } else {
+                    result += `❌ Nenhuma conversa encontrada: ${data.error?.message || 'Sem dados'}\n`;
                 }
 
-                updateResult('conversations-result', result);
+                updateResult('messages-result', result);
 
             } catch (error) {
-                updateResult('conversations-result', `❌ Erro no teste: ${error.message}`);
+                updateResult('messages-result', `❌ Erro no teste de mensagens: ${error.message}`);
             }
         }
 
-        // Forçar polling manual
+        // 4. Forçar polling
         async function forcePoll() {
-            updateResult('poll-result', '⚡ Forçando polling manual...');
+            updateResult('poll-result', '⚡ Forçando execução do polling...');
             
             try {
+                // Usar fetch interno que funciona na mesma origem
                 const response = await fetch(`${BACKEND_URL}/api/polling/control`, {
                     method: 'POST',
                     headers: {
@@ -321,12 +381,22 @@ Código: ${data.error?.code || response.status}
                     body: JSON.stringify({ action: 'poll_now' })
                 });
 
-                const data = await response.json();
-
-                if (data.success) {
-                    updateResult('poll-result', `✅ Polling executado: ${data.message}\n\nAgora verifique os logs em:\n${BACKEND_URL}/api/logs`);
+                if (response.ok) {
+                    const data = await response.json();
+                    updateResult('poll-result', `⚡ POLLING EXECUTADO:\n\n✅ ${data.message}\n\n🔍 Verifique os logs acima para ver o resultado.\n\n💡 O polling deve mostrar se encontrou conversas e mensagens.`);
                 } else {
-                    updateResult('poll-result', `❌ Erro no polling: ${data.error}`);
+                    updateResult('poll-result', `❌ Erro HTTP ${response.status}\n\nTentando método alternativo...`);
+                    
+                    // Método alternativo via iframe
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.src = `${BACKEND_URL}/api/test/polling`;
+                    document.body.appendChild(iframe);
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(iframe);
+                        updateResult('poll-result', `⚡ Comando enviado via método alternativo.\n\n🔍 Verifique os logs para ver o resultado.`);
+                    }, 3000);
                 }
 
             } catch (error) {
@@ -334,12 +404,108 @@ Código: ${data.error?.code || response.status}
             }
         }
 
+        // 5. Testar MultiOne
+        async function testMultiOne() {
+            updateResult('multione-result', '🎯 Testando conexão MultiOne...');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/test/multione`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    let result = `🎯 TESTE MULTIONE:\n\n`;
+                    
+                    if (data.success) {
+                        result += `✅ SUCESSO: Conexão MultiOne funcionando\n`;
+                        result += `📊 Resposta: ${JSON.stringify(data.result, null, 2)}\n`;
+                        result += `\n💡 Se este teste funcionou, o problema não é no MultiOne.`;
+                    } else {
+                        result += `❌ FALHA: ${data.error}\n`;
+                        result += `💡 O problema pode estar na conexão com MultiOne.`;
+                    }
+                    
+                    updateResult('multione-result', result);
+                } else {
+                    updateResult('multione-result', `❌ Erro HTTP ${response.status}`);
+                }
+
+            } catch (error) {
+                updateResult('multione-result', `❌ Erro ao testar MultiOne: ${error.message}`);
+            }
+        }
+
+        // 6. Debug completo
+        async function fullDebug() {
+            updateResult('debug-result', '🔬 Iniciando debug completo...\n\nExecutando todos os testes...');
+            
+            // Executar todos os testes em sequência
+            await checkSystemLogs();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testConversationsAPI();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testMessagesAPI();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testMultiOne();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await forcePoll();
+            
+            updateResult('debug-result', `🔬 DEBUG COMPLETO EXECUTADO!\n\n📊 Verifique os resultados em cada seção acima.\n\n💡 Com esses dados, podemos identificar exatamente onde está o problema.`);
+        }
+
+        // Monitor em tempo real
+        function startLiveMonitor() {
+            if (monitorInterval) clearInterval(monitorInterval);
+            
+            monitorInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${BACKEND_URL}/api/logs`);
+                    const data = await response.json();
+                    
+                    if (data.logs && data.logs.length > 0) {
+                        const newLogs = data.logs.slice(0, 5);
+                        const logsContainer = document.getElementById('live-logs');
+                        
+                        // Manter apenas os 10 logs mais recentes
+                        while (logsContainer.children.length > 10) {
+                            logsContainer.removeChild(logsContainer.lastChild);
+                        }
+                        
+                        newLogs.forEach(log => {
+                            const time = new Date(log.timestamp).toLocaleTimeString();
+                            const logType = log.message.includes('❌') ? 'error' : 
+                                          log.message.includes('✅') ? 'success' : 'info';
+                            
+                            const logEntry = document.createElement('div');
+                            logEntry.className = `log-entry log-${logType}`;
+                            logEntry.innerHTML = `[${time}] ${log.message}`;
+                            
+                            logsContainer.insertBefore(logEntry, logsContainer.firstChild);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erro no monitor:', error);
+                }
+            }, 3000);
+        }
+
         // Utilitário
         function updateResult(elementId, message) {
             const element = document.getElementById(elementId);
             element.style.display = 'block';
-            element.innerHTML = `<pre style="white-space: pre-wrap; margin: 0; font-size: 0.85rem;">${message}</pre>`;
+            element.innerHTML = `<pre style="white-space: pre-wrap; margin: 0;">${message}</pre>`;
         }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Começar monitor automaticamente
+            startLiveMonitor();
+        });
     </script>
 </body>
 </html>
