@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🧪 Instagram Message Flow Tester</title>
+    <title>🔍 Debug Polling Instagram</title>
     <style>
         * {
             margin: 0;
@@ -13,13 +13,13 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed, #6d28d9);
+            background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c);
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1000px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
@@ -32,42 +32,22 @@
             text-align: center;
             margin-bottom: 30px;
             padding: 25px;
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             border-radius: 15px;
         }
 
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .test-flow {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
-            margin: 30px 0;
-        }
-
-        .control-panel {
+        .debug-section {
             background: white;
             border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-left: 5px solid #8b5cf6;
-            height: fit-content;
-        }
-
-        .message-tester {
-            background: #f8fafc;
-            border: 2px solid #8b5cf6;
-            border-radius: 15px;
-            padding: 25px;
             margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 5px solid #ef4444;
         }
 
         .btn {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             border: none;
             padding: 15px 25px;
@@ -82,631 +62,284 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
         }
 
         .btn-success {
             background: linear-gradient(135deg, #10b981, #059669);
         }
 
-        .btn-warning {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-        }
-
-        .input-group {
-            margin: 15px 0;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .input-group input, .input-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-
-        .input-group input:focus, .input-group textarea:focus {
-            outline: none;
-            border-color: #8b5cf6;
-        }
-
-        .flow-monitor {
-            background: #1f2937;
-            color: white;
-            border-radius: 15px;
-            padding: 25px;
-            min-height: 600px;
-        }
-
-        .flow-steps {
-            display: grid;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .flow-step {
-            background: #374151;
-            padding: 15px;
+        .result-box {
+            background: #f8f9fa;
             border-radius: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .flow-step.active {
-            background: #7c3aed;
-            animation: pulse 2s infinite;
-        }
-
-        .flow-step.success {
-            background: #059669;
-        }
-
-        .flow-step.error {
-            background: #dc2626;
-        }
-
-        .step-number {
-            background: #6b7280;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        .flow-step.active .step-number {
-            background: white;
-            color: #7c3aed;
-        }
-
-        .flow-step.success .step-number {
-            background: white;
-            color: #059669;
-        }
-
-        .flow-step.error .step-number {
-            background: white;
-            color: #dc2626;
-        }
-
-        .monitor-logs {
-            background: #111827;
-            border-radius: 8px;
-            padding: 15px;
+            padding: 20px;
             margin: 15px 0;
-            max-height: 300px;
-            overflow-y: auto;
             font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+            border-left: 4px solid #ef4444;
+            display: none;
         }
 
-        .log-entry {
-            margin-bottom: 8px;
-            padding: 8px;
-            border-radius: 4px;
-            word-break: break-all;
+        .problem-box {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
         }
 
-        .log-error { background: rgba(248, 113, 113, 0.2); color: #fca5a5; }
-        .log-success { background: rgba(52, 211, 153, 0.2); color: #6ee7b7; }
-        .log-info { background: rgba(96, 165, 250, 0.2); color: #93c5fd; }
-        .log-webhook { background: rgba(167, 139, 250, 0.2); color: #c4b5fd; }
-        .log-instagram { background: rgba(236, 72, 153, 0.2); color: #f9a8d4; }
-
-        .accounts-info {
+        .solution-box {
             background: #ecfdf5;
             border: 2px solid #10b981;
             border-radius: 10px;
             padding: 20px;
             margin: 20px 0;
         }
-
-        .test-history {
-            background: #fef3c7;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .countdown {
-            font-size: 2rem;
-            font-weight: bold;
-            text-align: center;
-            margin: 20px 0;
-            color: #8b5cf6;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
-            <h1>🧪 Instagram Message Flow Tester</h1>
-            <p>Teste completo do fluxo: ivangeli_ → wesley_costa322 → Sistema → MultiOne</p>
+            <h1>🔍 Debug Polling Instagram</h1>
+            <p>Identificando por que não encontra conversas</p>
         </div>
 
-        <!-- Test Flow Layout -->
-        <div class="test-flow">
-            <!-- Control Panel -->
-            <div class="control-panel">
-                <h3 style="color: #8b5cf6; margin-bottom: 20px;">🎛️ Painel de Controle</h3>
+        <div class="problem-box">
+            <h3 style="color: #ef4444; margin-bottom: 15px;">🚨 PROBLEMA IDENTIFICADO</h3>
+            <p><strong>Status:</strong> "📭 [POLLING] Nenhuma conversa encontrada"</p>
+            <p><strong>Causa:</strong> Instagram Business Account ID incorreto ou token sem permissões</p>
+        </div>
 
-                <!-- Accounts Info -->
-                <div class="accounts-info">
-                    <h4 style="color: #10b981; margin-bottom: 10px;">📱 Contas de Teste</h4>
-                    <p><strong>Remetente:</strong> ivangeli_</p>
-                    <p><strong>Destinatário:</strong> wesley_costa322</p>
-                    <p><strong>Status:</strong> <span id="tester-status">✅ Testers configurados</span></p>
-                </div>
-
-                <!-- Message Tester -->
-                <div class="message-tester">
-                    <h4 style="color: #8b5cf6; margin-bottom: 15px;">💬 Configurar Teste</h4>
-                    
-                    <div class="input-group">
-                        <label>📝 Mensagem de Teste:</label>
-                        <textarea id="test-message" rows="3" placeholder="Digite a mensagem que será enviada...">TESTE FLUXO COMPLETO - ivangeli para wesley</textarea>
-                    </div>
-
-                    <div class="input-group">
-                        <label>⏱️ Timeout para resposta (segundos):</label>
-                        <input type="number" id="timeout" value="30" min="10" max="120">
-                    </div>
-
-                    <button class="btn btn-success" onclick="startFlowTest()">
-                        🚀 INICIAR TESTE COMPLETO
-                    </button>
-
-                    <button class="btn btn-warning" onclick="simulateWebhook()">
-                        🎯 SIMULAR WEBHOOK (TESTE INTERNO)
-                    </button>
-
-                    <button class="btn btn-danger" onclick="resetTest()">
-                        🔄 RESETAR TESTE
-                    </button>
-                </div>
-
-                <!-- Test History -->
-                <div class="test-history">
-                    <h4 style="color: #f59e0b; margin-bottom: 10px;">📊 Histórico de Testes</h4>
-                    <div id="test-history">
-                        <p style="color: #6b7280; font-style: italic;">Nenhum teste executado ainda...</p>
-                    </div>
-                </div>
+        <div class="debug-section">
+            <h3 style="color: #ef4444; margin-bottom: 15px;">1. 🔍 Verificar Token e Permissões</h3>
+            <button class="btn" onclick="debugToken()">
+                🔑 Debug Token Instagram
+            </button>
+            <div class="result-box" id="token-result">
+                Aguardando verificação...
             </div>
+        </div>
 
-            <!-- Flow Monitor -->
-            <div class="flow-monitor">
-                <h3 style="margin-bottom: 20px;">📊 Monitor do Fluxo de Mensagem</h3>
-
-                <!-- Flow Steps -->
-                <div class="flow-steps" id="flow-steps">
-                    <div class="flow-step" id="step-1">
-                        <div class="step-number">1</div>
-                        <div>
-                            <strong>📱 Mensagem Instagram</strong>
-                            <br><small>Envio de ivangeli_ para wesley_costa322</small>
-                        </div>
-                    </div>
-
-                    <div class="flow-step" id="step-2">
-                        <div class="step-number">2</div>
-                        <div>
-                            <strong>📡 Webhook Instagram</strong>
-                            <br><small>Instagram envia webhook para nosso sistema</small>
-                        </div>
-                    </div>
-
-                    <div class="flow-step" id="step-3">
-                        <div class="step-number">3</div>
-                        <div>
-                            <strong>🔍 Processamento Sistema</strong>
-                            <br><small>Sistema processa e valida a mensagem</small>
-                        </div>
-                    </div>
-
-                    <div class="flow-step" id="step-4">
-                        <div class="step-number">4</div>
-                        <div>
-                            <strong>🚀 Envio MultiOne</strong>
-                            <br><small>Sistema envia mensagem para MultiOne</small>
-                        </div>
-                    </div>
-
-                    <div class="flow-step" id="step-5">
-                        <div class="step-number">5</div>
-                        <div>
-                            <strong>✅ Confirmação</strong>
-                            <br><small>MultiOne confirma recebimento</small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Countdown -->
-                <div class="countdown" id="countdown" style="display: none;">
-                    Aguardando resposta: <span id="countdown-timer">30</span>s
-                </div>
-
-                <!-- Live Logs -->
-                <h4 style="margin: 20px 0 10px 0;">📋 Logs em Tempo Real</h4>
-                <div class="monitor-logs" id="live-logs">
-                    <div class="log-entry log-info">[SISTEMA] Aguardando início do teste...</div>
-                </div>
+        <div class="debug-section">
+            <h3 style="color: #ef4444; margin-bottom: 15px;">2. 📱 Encontrar Instagram Business Account ID Correto</h3>
+            <button class="btn" onclick="findBusinessAccount()">
+                📊 Buscar Business Account
+            </button>
+            <div class="result-box" id="account-result">
+                Aguardando busca...
             </div>
+        </div>
+
+        <div class="debug-section">
+            <h3 style="color: #ef4444; margin-bottom: 15px;">3. 💬 Testar API de Conversas</h3>
+            <button class="btn" onclick="testConversationsAPI()">
+                🧪 Testar Conversas API
+            </button>
+            <div class="result-box" id="conversations-result">
+                Aguardando teste...
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <h3 style="color: #ef4444; margin-bottom: 15px;">4. 🔄 Forçar Polling Manual</h3>
+            <button class="btn btn-success" onclick="forcePoll()">
+                ⚡ Polling Manual AGORA
+            </button>
+            <div class="result-box" id="poll-result">
+                Aguardando polling...
+            </div>
+        </div>
+
+        <div class="solution-box">
+            <h3 style="color: #10b981; margin-bottom: 15px;">💡 SOLUÇÕES POSSÍVEIS</h3>
+            <ol style="line-height: 1.8; margin-left: 20px;">
+                <li><strong>Token Incorreto:</strong> Gerar novo token com permissões corretas</li>
+                <li><strong>Business Account ID:</strong> Usar ID correto da conta Instagram Business</li>
+                <li><strong>Permissões:</strong> Token precisa de instagram_basic + instagram_manage_messages</li>
+                <li><strong>Conta Tipo:</strong> Precisa ser Instagram Business ou Creator Account</li>
+            </ol>
         </div>
     </div>
 
     <script>
         const BACKEND_URL = 'https://instagram-oauth-multione-production.up.railway.app';
-        let testInterval = null;
-        let countdownInterval = null;
-        let currentTest = null;
 
-        // Iniciar teste completo
-        async function startFlowTest() {
-            const message = document.getElementById('test-message').value;
-            const timeout = parseInt(document.getElementById('timeout').value);
-
-            if (!message.trim()) {
-                alert('Por favor, digite uma mensagem de teste!');
-                return;
-            }
-
-            // Reset do estado
-            resetFlowSteps();
-            clearLogs();
+        // Debug do token
+        async function debugToken() {
+            updateResult('token-result', '🔑 Verificando token e permissões...');
             
-            currentTest = {
-                message: message,
-                timeout: timeout,
-                startTime: new Date(),
-                steps: {}
-            };
-
-            addLog('info', `🚀 INICIANDO TESTE COMPLETO`);
-            addLog('info', `📝 Mensagem: "${message}"`);
-            addLog('info', `⏱️ Timeout: ${timeout}s`);
-
-            // Ativar step 1
-            setStepActive('step-1');
-            addLog('instagram', '📱 STEP 1: Aguardando envio da mensagem pelo Instagram');
-
-            // Mostrar instruções
-            addLog('info', '📋 INSTRUÇÕES:');
-            addLog('info', '1. Abra Instagram na conta: ivangeli_');
-            addLog('info', '2. Envie DM para: wesley_costa322');
-            addLog('info', `3. Texto exato: "${message}"`);
-            addLog('info', '4. Aguarde o processamento...');
-
-            // Iniciar monitoramento
-            startTestMonitoring(timeout);
-        }
-
-        // Iniciar monitoramento do teste
-        function startTestMonitoring(timeout) {
-            let timeLeft = timeout;
-            
-            // Mostrar countdown
-            const countdownDiv = document.getElementById('countdown');
-            const timerSpan = document.getElementById('countdown-timer');
-            countdownDiv.style.display = 'block';
-
-            // Countdown timer
-            countdownInterval = setInterval(() => {
-                timerSpan.textContent = timeLeft;
-                timeLeft--;
-
-                if (timeLeft < 0) {
-                    clearInterval(countdownInterval);
-                    countdownDiv.style.display = 'none';
-                    testTimeout();
-                }
-            }, 1000);
-
-            // Monitor logs
-            testInterval = setInterval(async () => {
-                try {
-                    await checkForWebhookActivity();
-                } catch (error) {
-                    addLog('error', `Erro no monitoramento: ${error.message}`);
-                }
-            }, 2000);
-        }
-
-        // Verificar atividade de webhook
-        async function checkForWebhookActivity() {
             try {
-                const response = await fetch(`${BACKEND_URL}/api/logs`);
+                // Primeiro verificar se o token está funcionando
+                const testUrl = 'https://graph.facebook.com/v18.0/me?access_token=EAAPHxlZBqFZAQBPMiCnZBvd54GWFFRm1ZCBtodu2mkCjEm0qnUzZAPfzj21pHZAAwX5gW3C92DEkZAPRq1OHx2B7QY8YFhZAoabuHCVnNniZBZB0XV6k6qQYJ4EqxCvioudZAWDzEdSozgnrzPYUozYa3RsUmaRsCsYWnsmCgLlRpcN9Gs9Of8ma8gYrUV5kGFHJbITY8dhD9yVcay4XoR5UUScVF3XApBiyZCqZBgc9qaAusOUQ4ZCzd3OfcToAZDZD&fields=id,name,accounts';
+                
+                const response = await fetch(testUrl);
                 const data = await response.json();
 
-                if (data.logs && data.logs.length > 0) {
-                    const recentLogs = data.logs.slice(0, 10);
-                    
-                    for (const log of recentLogs) {
-                        const logTime = new Date(log.timestamp);
-                        
-                        // Se o log é depois do início do teste
-                        if (currentTest && logTime > currentTest.startTime) {
-                            processLogForTest(log);
-                        }
+                if (response.ok) {
+                    let result = `🔑 TOKEN VÁLIDO:
+
+📊 Usuário: ${data.name || 'N/A'}
+🆔 ID: ${data.id || 'N/A'}
+
+📱 PÁGINAS CONECTADAS:`;
+
+                    if (data.accounts && data.accounts.data) {
+                        data.accounts.data.forEach((page, index) => {
+                            result += `\n${index + 1}. ${page.name} (ID: ${page.id})`;
+                        });
+                    } else {
+                        result += '\n❌ Nenhuma página encontrada';
                     }
+
+                    updateResult('token-result', result);
+                } else {
+                    updateResult('token-result', `❌ TOKEN INVÁLIDO:
+
+Erro: ${data.error?.message || 'Token expirado ou inválido'}
+Código: ${data.error?.code || response.status}
+
+💡 SOLUÇÃO: Gerar novo token no Graph API Explorer`);
                 }
+
             } catch (error) {
-                addLog('error', `Erro ao verificar logs: ${error.message}`);
+                updateResult('token-result', `❌ Erro ao verificar token: ${error.message}`);
             }
         }
 
-        // Processar log para o teste
-        function processLogForTest(log) {
-            const message = log.message;
-
-            // Step 2: Webhook recebido
-            if (message.includes('Webhook Instagram recebido') && !currentTest.steps.webhook) {
-                currentTest.steps.webhook = true;
-                setStepSuccess('step-1');
-                setStepActive('step-2');
-                addLog('webhook', '📡 STEP 2: Webhook Instagram recebido!');
-                addLog('success', '✅ Instagram enviou o webhook - FUNCIONANDO!');
-            }
-
-            // Step 3: Processamento
-            if (message.includes('Mensagem Instagram recebida') && !currentTest.steps.processing) {
-                currentTest.steps.processing = true;
-                setStepSuccess('step-2');
-                setStepActive('step-3');
-                addLog('success', '🔍 STEP 3: Sistema processando mensagem');
-                
-                // Extrair texto da mensagem se possível
-                const textMatch = message.match(/"([^"]+)"/);
-                if (textMatch) {
-                    addLog('info', `📝 Texto capturado: "${textMatch[1]}"`);
-                }
-            }
-
-            // Step 4: Enviando para MultiOne
-            if (message.includes('Enviando para MultiOne') && !currentTest.steps.sending) {
-                currentTest.steps.sending = true;
-                setStepSuccess('step-3');
-                setStepActive('step-4');
-                addLog('info', '🚀 STEP 4: Enviando para MultiOne...');
-            }
-
-            // Step 5: Sucesso completo
-            if (message.includes('Mensagem enviada para MultiOne') && !currentTest.steps.complete) {
-                currentTest.steps.complete = true;
-                setStepSuccess('step-4');
-                setStepSuccess('step-5');
-                addLog('success', '✅ STEP 5: TESTE COMPLETO - SUCESSO TOTAL!');
-                
-                completeTest('success');
-            }
-
-            // Erros
-            if (message.includes('Erro') && message.includes('MultiOne')) {
-                setStepError('step-4');
-                addLog('error', '❌ ERRO: Falha ao enviar para MultiOne');
-                completeTest('error_multione');
-            }
-        }
-
-        // Completar teste
-        function completeTest(result) {
-            if (testInterval) clearInterval(testInterval);
-            if (countdownInterval) clearInterval(countdownInterval);
+        // Buscar Business Account correto
+        async function findBusinessAccount() {
+            updateResult('account-result', '📱 Buscando Instagram Business Account...');
             
-            const countdownDiv = document.getElementById('countdown');
-            countdownDiv.style.display = 'none';
-
-            const endTime = new Date();
-            const duration = Math.round((endTime - currentTest.startTime) / 1000);
-
-            // Adicionar ao histórico
-            addToTestHistory(result, duration);
-
-            // Log final
-            switch (result) {
-                case 'success':
-                    addLog('success', `🎉 TESTE CONCLUÍDO COM SUCESSO em ${duration}s!`);
-                    addLog('success', '✅ Todo o fluxo funcionou perfeitamente!');
-                    break;
-                case 'timeout':
-                    addLog('error', `⏰ TESTE TIMEOUT após ${duration}s`);
-                    addLog('error', '❌ Instagram não enviou webhook - problema identificado!');
-                    break;
-                case 'error_multione':
-                    addLog('error', `❌ ERRO no MultiOne após ${duration}s`);
-                    addLog('info', '💡 Sistema recebe webhooks mas falha no MultiOne');
-                    break;
-            }
-
-            currentTest = null;
-        }
-
-        // Timeout do teste
-        function testTimeout() {
-            if (!currentTest.steps.webhook) {
-                setStepError('step-1');
-                setStepError('step-2');
-                addLog('error', '❌ TIMEOUT: Instagram não enviou webhook');
-                addLog('error', '💡 Possíveis causas:');
-                addLog('error', '  - Testers não funcionando corretamente');
-                addLog('error', '  - App Review necessário');
-                addLog('error', '  - Mensagem não foi enviada via DM');
-            }
-            
-            completeTest('timeout');
-        }
-
-        // Simular webhook para teste interno
-        async function simulateWebhook() {
-            addLog('info', '🎯 Simulando webhook interno...');
-            resetFlowSteps();
-
             try {
-                const testMessage = document.getElementById('test-message').value || 'TESTE SIMULADO INTERNO';
+                // Buscar páginas do usuário
+                const pagesUrl = 'https://graph.facebook.com/v18.0/me/accounts?access_token=EAAPHxlZBqFZAQBPMiCnZBvd54GWFFRm1ZCBtodu2mkCjEm0qnUzZAPfzj21pHZAAwX5gW3C92DEkZAPRq1OHx2B7QY8YFhZAoabuHCVnNniZBZB0XV6k6qQYJ4EqxCvioudZAWDzEdSozgnrzPYUozYa3RsUmaRsCsYWnsmCgLlRpcN9Gs9Of8ma8gYrUV5kGFHJbITY8dhD9yVcay4XoR5UUScVF3XApBiyZCqZBgc9qaAusOUQ4ZCzd3OfcToAZDZD';
                 
-                const webhookData = {
-                    object: 'instagram',
-                    entry: [{
-                        id: '752860274568592',
-                        messaging: [{
-                            sender: { id: 'simulated_ivangeli' },
-                            recipient: { id: '752860274568592' },
-                            timestamp: Date.now(),
-                            message: {
-                                mid: 'sim_' + Date.now(),
-                                text: testMessage
+                const pagesResponse = await fetch(pagesUrl);
+                const pagesData = await pagesResponse.json();
+
+                if (!pagesResponse.ok) {
+                    updateResult('account-result', `❌ Erro ao buscar páginas: ${pagesData.error?.message}`);
+                    return;
+                }
+
+                let result = `📱 PÁGINAS ENCONTRADAS:\n\n`;
+
+                if (pagesData.data && pagesData.data.length > 0) {
+                    for (let i = 0; i < pagesData.data.length; i++) {
+                        const page = pagesData.data[i];
+                        result += `${i + 1}. 📄 ${page.name}\n`;
+                        result += `   🆔 Page ID: ${page.id}\n`;
+
+                        // Verificar se tem Instagram conectado
+                        try {
+                            const igUrl = `https://graph.facebook.com/v18.0/${page.id}?access_token=${page.access_token}&fields=instagram_business_account`;
+                            const igResponse = await fetch(igUrl);
+                            const igData = await igResponse.json();
+
+                            if (igData.instagram_business_account) {
+                                result += `   ✅ Instagram: ${igData.instagram_business_account.id}\n`;
+                                result += `   📸 ESTE É O ID CORRETO! ^^^^^^^^^\n`;
+                            } else {
+                                result += `   ❌ Instagram: Não conectado\n`;
                             }
-                        }]
-                    }]
-                };
+                        } catch (error) {
+                            result += `   ⚠️ Instagram: Erro ao verificar\n`;
+                        }
+                        result += `\n`;
+                    }
+                } else {
+                    result += `❌ Nenhuma página encontrada\n\n`;
+                }
 
-                // Simular os steps
-                setStepSuccess('step-1');
-                setStepActive('step-2');
-                addLog('webhook', '📡 Enviando webhook simulado...');
+                result += `💡 ATUAL NO SISTEMA: 17841400008460056\n`;
+                result += `🔍 VERIFIQUE: Se o ID acima é diferente, atualize no código!`;
 
-                const response = await fetch(`${BACKEND_URL}/webhook/instagram`, {
+                updateResult('account-result', result);
+
+            } catch (error) {
+                updateResult('account-result', `❌ Erro ao buscar Business Account: ${error.message}`);
+            }
+        }
+
+        // Testar API de conversas
+        async function testConversationsAPI() {
+            updateResult('conversations-result', '💬 Testando API de conversas...');
+            
+            try {
+                // Testar com diferentes IDs
+                const idsToTest = [
+                    '17841400008460056', // ID atual
+                    '752860274568592'    // ID da página
+                ];
+
+                let result = `💬 TESTANDO API DE CONVERSAS:\n\n`;
+
+                for (const id of idsToTest) {
+                    result += `🔍 Testando ID: ${id}\n`;
+                    
+                    try {
+                        const conversationsUrl = `https://graph.facebook.com/v18.0/${id}/conversations?access_token=EAAPHxlZBqFZAQBPMiCnZBvd54GWFFRm1ZCBtodu2mkCjEm0qnUzZAPfzj21pHZAAwX5gW3C92DEkZAPRq1OHx2B7QY8YFhZAoabuHCVnNniZBZB0XV6k6qQYJ4EqxCvioudZAWDzEdSozgnrzPYUozYa3RsUmaRsCsYWnsmCgLlRpcN9Gs9Of8ma8gYrUV5kGFHJbITY8dhD9yVcay4XoR5UUScVF3XApBiyZCqZBgc9qaAusOUQ4ZCzd3OfcToAZDZD&fields=id,updated_time,participants`;
+                        
+                        const response = await fetch(conversationsUrl);
+                        const data = await response.json();
+
+                        if (response.ok && data.data) {
+                            result += `✅ FUNCIONOU! ${data.data.length} conversas encontradas\n`;
+                            if (data.data.length > 0) {
+                                result += `📊 Primeira conversa: ${data.data[0].id}\n`;
+                                result += `⏰ Atualizada: ${data.data[0].updated_time}\n`;
+                            }
+                            result += `🎯 USE ESTE ID: ${id}\n`;
+                        } else {
+                            result += `❌ Erro: ${data.error?.message || 'Sem conversas'}\n`;
+                        }
+                    } catch (error) {
+                        result += `❌ Erro: ${error.message}\n`;
+                    }
+                    result += `\n`;
+                }
+
+                updateResult('conversations-result', result);
+
+            } catch (error) {
+                updateResult('conversations-result', `❌ Erro no teste: ${error.message}`);
+            }
+        }
+
+        // Forçar polling manual
+        async function forcePoll() {
+            updateResult('poll-result', '⚡ Forçando polling manual...');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/polling/control`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(webhookData)
+                    body: JSON.stringify({ action: 'poll_now' })
                 });
 
-                if (response.ok) {
-                    setStepSuccess('step-2');
-                    addLog('success', '✅ Webhook simulado processado com sucesso!');
-                    addLog('info', '💡 Sistema interno funcionando - problema é no Instagram não enviar webhooks reais');
+                const data = await response.json();
+
+                if (data.success) {
+                    updateResult('poll-result', `✅ Polling executado: ${data.message}\n\nAgora verifique os logs em:\n${BACKEND_URL}/api/logs`);
                 } else {
-                    setStepError('step-2');
-                    addLog('error', `❌ Erro no webhook simulado: ${response.status}`);
+                    updateResult('poll-result', `❌ Erro no polling: ${data.error}`);
                 }
 
             } catch (error) {
-                addLog('error', `❌ Erro na simulação: ${error.message}`);
-                setStepError('step-2');
+                updateResult('poll-result', `❌ Erro ao forçar polling: ${error.message}`);
             }
         }
 
-        // Resetar teste
-        function resetTest() {
-            if (testInterval) clearInterval(testInterval);
-            if (countdownInterval) clearInterval(countdownInterval);
-            
-            document.getElementById('countdown').style.display = 'none';
-            resetFlowSteps();
-            clearLogs();
-            currentTest = null;
-            
-            addLog('info', '[SISTEMA] Teste resetado - pronto para novo teste');
+        // Utilitário
+        function updateResult(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.innerHTML = `<pre style="white-space: pre-wrap; margin: 0; font-size: 0.85rem;">${message}</pre>`;
         }
-
-        // Gerenciar steps do fluxo
-        function resetFlowSteps() {
-            for (let i = 1; i <= 5; i++) {
-                const step = document.getElementById(`step-${i}`);
-                step.className = 'flow-step';
-            }
-        }
-
-        function setStepActive(stepId) {
-            const step = document.getElementById(stepId);
-            step.className = 'flow-step active';
-        }
-
-        function setStepSuccess(stepId) {
-            const step = document.getElementById(stepId);
-            step.className = 'flow-step success';
-        }
-
-        function setStepError(stepId) {
-            const step = document.getElementById(stepId);
-            step.className = 'flow-step error';
-        }
-
-        // Gerenciar logs
-        function addLog(type, message) {
-            const logs = document.getElementById('live-logs');
-            const timestamp = new Date().toLocaleTimeString();
-            
-            const logEntry = document.createElement('div');
-            logEntry.className = `log-entry log-${type}`;
-            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
-            
-            logs.insertBefore(logEntry, logs.firstChild);
-            
-            while (logs.children.length > 50) {
-                logs.removeChild(logs.lastChild);
-            }
-        }
-
-        function clearLogs() {
-            const logs = document.getElementById('live-logs');
-            logs.innerHTML = '<div class="log-entry log-info">[SISTEMA] Logs limpos - pronto para teste...</div>';
-        }
-
-        // Histórico de testes
-        function addToTestHistory(result, duration) {
-            const history = document.getElementById('test-history');
-            const timestamp = new Date().toLocaleString();
-            
-            const resultEmoji = {
-                'success': '✅',
-                'timeout': '⏰',
-                'error_multione': '❌'
-            }[result] || '❓';
-
-            const resultText = {
-                'success': 'Sucesso',
-                'timeout': 'Timeout',
-                'error_multione': 'Erro MultiOne'
-            }[result] || 'Desconhecido';
-
-            if (history.innerHTML.includes('Nenhum teste executado')) {
-                history.innerHTML = '';
-            }
-
-            const testEntry = document.createElement('div');
-            testEntry.style.cssText = 'margin: 5px 0; padding: 8px; background: white; border-radius: 5px; font-size: 0.9rem;';
-            testEntry.innerHTML = `${resultEmoji} <strong>${resultText}</strong> - ${duration}s<br><small>${timestamp}</small>`;
-            
-            history.insertBefore(testEntry, history.firstChild);
-            
-            while (history.children.length > 10) {
-                history.removeChild(history.lastChild);
-            }
-        }
-
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', function() {
-            addLog('info', '🧪 Sistema de teste carregado');
-            addLog('info', '📱 Contas configuradas: ivangeli_ → wesley_costa322');
-            addLog('info', '🎯 Pronto para testar o fluxo completo');
-        });
     </script>
 </body>
 </html>
