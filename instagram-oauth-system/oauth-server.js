@@ -17,7 +17,7 @@ const CONFIG = {
     multioneApiUrl: process.env.MULTIONE_API_URL || 'https://sock.multi360.digital/api/messages/send',
     baseUrl: process.env.BASE_URL || 'https://instagram-oauth-multione-production.up.railway.app',
     // Token atual do Instagram para polling
-    instagramPageToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || 'EAAPHxlZBqFZAQBPMiCnZBvd54GWFFRm1ZCBtodu2mkCjEm0qnUzZAPfzj21pHZAAwX5gW3C92DEkZAPRq1OHx2B7QY8YFhZAoabuHCVnNniZBZB0XV6k6qQYJ4EqxCvioudZAWDzEdSozgnrzPYUozYa3RsUmaRsCsYWnsmCgLlRpcN9Gs9Of8ma8gYrUV5kGFHJbITY8dhD9yVcay4XoR5UUScVF3XApBiyZCqZBgc9qaAusOUQ4ZCzd3OfcToAZDZD',
+    instagramPageToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || 'EAAPHxlZBqFZAQBPCFdfImaq1hf368RTQ6AuaMbgrqzloZBfaYlcoKs6WXZA4s6jHpC9hPL8q3uJj1IyIKjqA117ZAgmNRfGl3O6ndJRwhMEBGlFtUZARNFZAZCnqm1TiOO2HQx0xSInS9VTlNWrkWjkRDoSww7lpAoLvbojMgeLTwveLADYcIRmOcpKuH4zs2HOrAJi6vJBb9xVs3F5ZA2Ii2QyCbsDHdzuQh44DNsAx97VViqZBkNr9uC',
     // Configurações do Polling
     pollingEnabled: process.env.POLLING_ENABLED !== 'false', // true por padrão
     pollingInterval: parseInt(process.env.POLLING_INTERVAL) || 120000, // 2 minutos
