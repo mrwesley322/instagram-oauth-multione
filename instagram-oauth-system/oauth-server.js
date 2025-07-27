@@ -24,7 +24,7 @@ const CONFIG = {
     instagramBusinessAccountId: process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID || '17841400008460056' // ID da conta business
 };
 
-// Base de dados em memória (em produção, usar banco real)
+// Base de dados em memória
 const connectedAccounts = new Map();
 const webhookSubscriptions = new Map();
 
@@ -397,38 +397,6 @@ app.post('/api/setup-webhook', async (req, res) => {
     }
 });
 
-// Listar contas conectadas
-app.get('/api/connected-accounts', (req, res) => {
-    const accounts = Array.from(connectedAccounts.values()).map(account => ({
-        userId: account.userId,
-        name: account.name,
-        email: account.email,
-        connectedAt: account.connectedAt,
-        webhooksActive: Array.from(webhookSubscriptions.values())
-            .filter(sub => sub.userId === account.userId && sub.active).length
-    }));
-    
-    res.json({ accounts });
-});
-
-// Desconectar conta
-app.delete('/api/disconnect/:userId', (req, res) => {
-    const { userId } = req.params;
-    
-    // Remover webhooks da conta
-    for (const [pageId, subscription] of webhookSubscriptions.entries()) {
-        if (subscription.userId === userId) {
-            webhookSubscriptions.delete(pageId);
-        }
-    }
-    
-    // Remover conta
-    connectedAccounts.delete(userId);
-    
-    console.log(`🗑️ Conta ${userId} desconectada`);
-    res.json({ success: true });
-});
-
 // ==========================================
 // ENDPOINTS DE CONTROLE DO POLLING
 // ==========================================
@@ -481,18 +449,8 @@ app.post('/api/polling/control', (req, res) => {
     }
 });
 
-// Limpar cache de mensagens processadas
-app.post('/api/polling/clear-cache', (req, res) => {
-    processedMessages.clear();
-    lastPollingCheck = new Date(Date.now() - 24 * 60 * 60 * 1000); // Reset para 24h atrás
-    res.json({ 
-        success: true, 
-        message: 'Cache limpo - mensagens antigas serão reprocessadas' 
-    });
-});
-
 // ==========================================
-// WEBHOOK INSTAGRAM/FACEBOOK (MANTIDO PARA COMPATIBILIDADE)
+// WEBHOOK INSTAGRAM (MANTIDO PARA COMPATIBILIDADE)
 // ==========================================
 
 // Verificação do webhook (GET)
@@ -514,21 +472,6 @@ app.get('/webhook/instagram', (req, res) => {
 
 // Receber mensagens do webhook (POST)
 app.post('/webhook/instagram', express.raw({type: 'application/json'}), async (req, res) => {
-    const signature = req.get('X-Hub-Signature-256');
-    
-    // Verificar assinatura (em produção)
-    if (process.env.NODE_ENV === 'production' && CONFIG.facebookAppSecret) {
-        const expectedSignature = crypto
-            .createHmac('sha256', CONFIG.facebookAppSecret)
-            .update(req.body, 'utf8')
-            .digest('hex');
-            
-        if (signature !== `sha256=${expectedSignature}`) {
-            console.log('❌ Assinatura inválida');
-            return res.sendStatus(403);
-        }
-    }
-    
     const body = JSON.parse(req.body.toString());
     console.log('📸 [WEBHOOK] Instagram webhook recebido:', JSON.stringify(body, null, 2));
     
@@ -552,18 +495,13 @@ async function processWebhookEntry(entry) {
     console.log(`🔍 [WEBHOOK] Processando entrada para página ${pageId}...`);
     
     // Usar token fixo para testers
-    let subscription = webhookSubscriptions.get(pageId);
-    
-    if (!subscription || !subscription.active || pageId === '752860274568592') {
-        console.log(`🎯 [WEBHOOK] Usando token fixo para página ${pageId} (modo tester)`);
-        subscription = {
-            pageId: pageId,
-            userId: 'tester_user',
-            accessToken: CONFIG.instagramPageToken,
-            subscribedAt: new Date().toISOString(),
-            active: true
-        };
-    }
+    const subscription = {
+        pageId: pageId,
+        userId: 'tester_user',
+        accessToken: CONFIG.instagramPageToken,
+        subscribedAt: new Date().toISOString(),
+        active: true
+    };
     
     console.log(`✅ [WEBHOOK] Subscription ativa para página ${pageId}`);
     
@@ -574,16 +512,6 @@ async function processWebhookEntry(entry) {
             await processInstagramMessage(messaging, subscription);
         }
     }
-    
-    // Processar mudanças (Instagram)
-    if (entry.changes) {
-        console.log(`🔄 [WEBHOOK] Processando ${entry.changes.length} mudanças...`);
-        for (const change of entry.changes) {
-            if (change.field === 'messages') {
-                await processInstagramDM(change.value, subscription);
-            }
-        }
-    }
 }
 
 // Processar mensagem do Instagram (Webhook)
@@ -591,7 +519,6 @@ async function processInstagramMessage(messaging, subscription) {
     try {
         if (messaging.message && messaging.message.text) {
             console.log(`💬 [WEBHOOK] Mensagem Instagram recebida: "${messaging.message.text}"`);
-            console.log(`👤 [WEBHOOK] De: ${messaging.sender.id} → Para: ${messaging.recipient.id}`);
             
             // Marcar como processada para evitar duplicatas com polling
             if (messaging.message.mid) {
@@ -613,7 +540,6 @@ async function processInstagramMessage(messaging, subscription) {
                 external_message_id: messaging.message.mid,
                 metadata: {
                     page_id: subscription.pageId,
-                    instagram_account: senderInfo.instagram_id,
                     received_at: new Date().toISOString(),
                     from_webhook: true,
                     token_used: subscription.accessToken.substring(0, 20) + '...'
@@ -629,37 +555,9 @@ async function processInstagramMessage(messaging, subscription) {
             
             // Enviar para MultiOne
             await sendToMultiOne(messageData);
-        } else {
-            console.log('⚠️ [WEBHOOK] Mensagem sem texto recebida:', messaging);
         }
     } catch (error) {
         console.error('❌ [WEBHOOK] Erro processando mensagem Instagram:', error.message);
-    }
-}
-
-// Processar DM do Instagram (Instagram Graph API)
-async function processInstagramDM(messageData, subscription) {
-    try {
-        console.log('📱 [WEBHOOK] DM Instagram recebido:', messageData);
-        
-        // Estrutura específica do Instagram Graph API
-        if (messageData.message && messageData.message.text) {
-            const multioneData = {
-                number: messageData.from.id,
-                message: messageData.message.text,
-                sender_id: messageData.from.id,
-                sender_name: messageData.from.username || 'Usuario Instagram',
-                platform: 'instagram',
-                timestamp: new Date().toISOString(),
-                type: 'inbound',
-                external_id: messageData.from.id,
-                external_message_id: messageData.message.mid
-            };
-            
-            await sendToMultiOne(multioneData);
-        }
-    } catch (error) {
-        console.error('❌ [WEBHOOK] Erro processando DM Instagram:', error.message);
     }
 }
 
@@ -704,14 +602,12 @@ async function sendToMultiOne(messageData) {
         
         console.log('✅ Mensagem enviada para MultiOne com sucesso!');
         console.log('📊 Resposta MultiOne status:', response.status);
-        console.log('📋 Resposta MultiOne data:', response.data);
         
         return response.data;
         
     } catch (error) {
         console.error('❌ ERRO ao enviar para MultiOne:');
         console.error('📍 URL:', CONFIG.multioneApiUrl);
-        console.error('🔑 Token:', CONFIG.multioneToken ? 'Configurado' : 'Faltando');
         console.error('📊 Status:', error.response?.status);
         console.error('📋 Dados:', error.response?.data);
         console.error('⚠️ Message:', error.message);
@@ -751,39 +647,7 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Status do sistema
-app.get('/api/system/status', (req, res) => {
-    const stats = {
-        accounts: {
-            total: connectedAccounts.size,
-            active: Array.from(connectedAccounts.values()).length
-        },
-        webhooks: {
-            total: webhookSubscriptions.size,
-            active: Array.from(webhookSubscriptions.values()).filter(sub => sub.active).length
-        },
-        polling: {
-            enabled: CONFIG.pollingEnabled,
-            active: pollingInterval !== null,
-            interval: CONFIG.pollingInterval,
-            lastCheck: lastPollingCheck.toISOString(),
-            processedMessages: processedMessages.size
-        },
-        system: {
-            uptime: process.uptime(),
-            memory: process.memoryUsage(),
-            nodeVersion: process.version
-        },
-        tokens: {
-            instagram: CONFIG.instagramPageToken ? 'Configurado' : 'Faltando',
-            multione: CONFIG.multioneToken ? 'Configurado' : 'Faltando'
-        }
-    };
-    
-    res.json(stats);
-});
-
-// Logs recentes (em produção, usar sistema de logs real)
+// Logs recentes
 const recentLogs = [];
 const originalConsoleLog = console.log;
 console.log = (...args) => {
@@ -793,4 +657,124 @@ console.log = (...args) => {
         level: 'info'
     };
     recentLogs.unshift(logEntry);
-    if (recentLogs.length > 200) recentLogs.pop();
+    if (recentLogs.length > 100) recentLogs.pop();
+    originalConsoleLog(...args);
+};
+
+app.get('/api/logs', (req, res) => {
+    res.json({ logs: recentLogs.slice(0, 50) });
+});
+
+// ==========================================
+// UTILITÁRIOS E TESTES
+// ==========================================
+
+// Testar conexão MultiOne
+app.post('/api/test/multione', async (req, res) => {
+    try {
+        const testMessage = {
+            number: 'test_user_polling_system',
+            message: 'TESTE FINAL - OAuth + Polling System → MultiOne - Funcionando!',
+            sender_id: 'polling_test_final',
+            sender_name: 'Polling Test System',
+            platform: 'instagram',
+            timestamp: new Date().toISOString(),
+            type: 'inbound',
+            test: true
+        };
+        
+        const result = await sendToMultiOne(testMessage);
+        
+        res.json({ 
+            success: true, 
+            result,
+            message: 'Teste manual enviado para MultiOne com sucesso!'
+        });
+        
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            error: error.message
+        });
+    }
+});
+
+// Testar polling manualmente
+app.post('/api/test/polling', async (req, res) => {
+    try {
+        if (!CONFIG.instagramPageToken) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Token Instagram não configurado' 
+            });
+        }
+        
+        // Executar polling manual
+        await pollInstagramMessages();
+        
+        res.json({ 
+            success: true, 
+            message: 'Polling manual executado com sucesso!',
+            status: {
+                lastCheck: lastPollingCheck.toISOString(),
+                processedMessages: processedMessages.size
+            }
+        });
+        
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+});
+
+// ==========================================
+// INICIALIZAÇÃO DO SERVIDOR
+// ==========================================
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log('🎉 =======================================');
+    console.log('🚀 INSTAGRAM OAUTH + POLLING SYSTEM ATIVO!');
+    console.log('🎉 =======================================');
+    console.log(`🌐 Servidor: ${CONFIG.baseUrl}`);
+    console.log(`📱 Interface: ${CONFIG.baseUrl}`);
+    console.log(`🔗 OAuth Callback: ${CONFIG.baseUrl}/oauth/callback`);
+    console.log(`📸 Webhook: ${CONFIG.baseUrl}/webhook/instagram`);
+    console.log(`💚 Health: ${CONFIG.baseUrl}/health`);
+    console.log('🎉 =======================================');
+    console.log(`📋 Config: App ID ${CONFIG.facebookAppId}`);
+    console.log(`🔑 MultiOne: ${CONFIG.multioneToken ? 'Configurado' : 'Faltando'}`);
+    console.log(`📸 Instagram Token: ${CONFIG.instagramPageToken ? 'Configurado' : 'Faltando'}`);
+    console.log(`🔄 Polling: ${CONFIG.pollingEnabled ? 'Habilitado' : 'Desabilitado'} (${CONFIG.pollingInterval/1000}s)`);
+    console.log('🎉 =======================================');
+    
+    // Inicializar sistema de polling após 5 segundos
+    if (CONFIG.pollingEnabled && CONFIG.instagramPageToken) {
+        console.log('🔄 Iniciando sistema de polling em 5 segundos...');
+        setTimeout(() => {
+            startPolling();
+        }, 5000);
+    } else {
+        console.log('⚠️ Polling não iniciado:');
+        if (!CONFIG.pollingEnabled) console.log('   - Polling desabilitado');
+        if (!CONFIG.instagramPageToken) console.log('   - Token Instagram não configurado');
+    }
+});
+
+// Cleanup ao encerrar aplicação
+process.on('SIGTERM', () => {
+    console.log('🛑 Encerrando aplicação...');
+    stopPolling();
+    process.exit(0);
+});
+
+process.on('SIGINT', () => {
+    console.log('🛑 Encerrando aplicação...');
+    stopPolling();
+    process.exit(0);
+});
+
+module.exports = app;
