@@ -21,7 +21,7 @@ const CONFIG = {
     // Configurações do Polling
     pollingEnabled: process.env.POLLING_ENABLED !== 'false', // true por padrão
     pollingInterval: parseInt(process.env.POLLING_INTERVAL) || 120000, // 2 minutos
-    instagramBusinessAccountId: process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID || '17841400008460056' // ID da conta business
+    instagramBusinessAccountId: process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID || '17841464566186399' // ID correto da conta business
 };
 
 // Base de dados em memória
