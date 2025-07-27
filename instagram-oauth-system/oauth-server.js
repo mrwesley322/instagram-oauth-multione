@@ -15,7 +15,9 @@ const CONFIG = {
     webhookSecret: process.env.WEBHOOK_SECRET || 'webhook_secret_123',
     multioneToken: process.env.MULTIONE_TOKEN || '68eff5505a3989e99dadbc7243c9411efba9a80ef1f59e4680c89678bf63f515',
     multioneApiUrl: process.env.MULTIONE_API_URL || 'https://sock.multi360.digital/api/messages/send',
-    baseUrl: process.env.BASE_URL || 'https://instagram-oauth-multione-production.up.railway.app'
+    baseUrl: process.env.BASE_URL || 'https://instagram-oauth-multione-production.up.railway.app',
+    // Token atual do Instagram para testers
+    instagramPageToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || 'EAAPHxlZBqFZAQBPMiCnZBvd54GWFFRm1ZCBtodu2mkCjEm0qnUzZAPfzj21pHZAAwX5gW3C92DEkZAPRq1OHx2B7QY8YFhZAoabuHCVnNniZBZB0XV6k6qQYJ4EqxCvioudZAWDzEdSozgnrzPYUozYa3RsUmaRsCsYWnsmCgLlRpcN9Gs9Of8ma8gYrUV5kGFHJbITY8dhD9yVcay4XoR5UUScVF3XApBiyZCqZBgc9qaAusOUQ4ZCzd3OfcToAZDZD'
 };
 
 // Base de dados em memória (em produção, usar banco real)
@@ -23,6 +25,7 @@ const connectedAccounts = new Map();
 const webhookSubscriptions = new Map();
 
 console.log('🚀 Inicializando Sistema OAuth + Webhook...');
+console.log(`🔑 Token Instagram: ${CONFIG.instagramPageToken ? 'Configurado' : 'Faltando'}`);
 
 // ==========================================
 // ENDPOINTS OAUTH E CONFIGURAÇÃO
@@ -271,15 +274,28 @@ app.post('/webhook/instagram', express.raw({type: 'application/json'}), async (r
 async function processWebhookEntry(entry) {
     const pageId = entry.id;
     
-    // Verificar se temos essa página registrada
-    const subscription = webhookSubscriptions.get(pageId);
-    if (!subscription || !subscription.active) {
-        console.log(`⚠️ Página ${pageId} não está registrada`);
-        return;
+    console.log(`🔍 Processando entrada para página ${pageId}...`);
+    
+    // ALTERAÇÃO PRINCIPAL: Usar token fixo para testers
+    let subscription = webhookSubscriptions.get(pageId);
+    
+    // Se não tiver subscription cadastrada OU for página de teste, usar token fixo
+    if (!subscription || !subscription.active || pageId === '752860274568592') {
+        console.log(`🎯 Usando token fixo para página ${pageId} (modo tester)`);
+        subscription = {
+            pageId: pageId,
+            userId: 'tester_user',
+            accessToken: CONFIG.instagramPageToken,
+            subscribedAt: new Date().toISOString(),
+            active: true
+        };
     }
+    
+    console.log(`✅ Subscription ativa para página ${pageId}`);
     
     // Processar mensagens
     if (entry.messaging) {
+        console.log(`💬 Processando ${entry.messaging.length} mensagens...`);
         for (const messaging of entry.messaging) {
             await processInstagramMessage(messaging, subscription);
         }
@@ -287,6 +303,7 @@ async function processWebhookEntry(entry) {
     
     // Processar mudanças (Instagram)
     if (entry.changes) {
+        console.log(`🔄 Processando ${entry.changes.length} mudanças...`);
         for (const change of entry.changes) {
             if (change.field === 'messages') {
                 await processInstagramDM(change.value, subscription);
@@ -300,6 +317,7 @@ async function processInstagramMessage(messaging, subscription) {
     try {
         if (messaging.message && messaging.message.text) {
             console.log(`💬 Mensagem Instagram recebida: "${messaging.message.text}"`);
+            console.log(`👤 De: ${messaging.sender.id} → Para: ${messaging.recipient.id}`);
             
             // Obter informações do remetente
             const senderInfo = await getUserInfo(messaging.sender.id, subscription.accessToken);
@@ -317,12 +335,21 @@ async function processInstagramMessage(messaging, subscription) {
                 metadata: {
                     page_id: subscription.pageId,
                     instagram_account: senderInfo.instagram_id,
-                    received_at: new Date().toISOString()
+                    received_at: new Date().toISOString(),
+                    token_used: subscription.accessToken.substring(0, 20) + '...'
                 }
             };
             
+            console.log('📦 Dados preparados para MultiOne:', {
+                sender: messageData.sender_name,
+                message: messageData.message,
+                platform: messageData.platform
+            });
+            
             // Enviar para MultiOne
             await sendToMultiOne(messageData);
+        } else {
+            console.log('⚠️ Mensagem sem texto recebida:', messaging);
         }
     } catch (error) {
         console.error('❌ Erro processando mensagem Instagram:', error.message);
@@ -358,6 +385,8 @@ async function processInstagramDM(messageData, subscription) {
 // Obter informações do usuário
 async function getUserInfo(userId, accessToken) {
     try {
+        console.log(`👤 Buscando informações do usuário ${userId}...`);
+        
         const response = await axios.get(`https://graph.facebook.com/v18.0/${userId}`, {
             params: {
                 access_token: accessToken,
@@ -365,9 +394,10 @@ async function getUserInfo(userId, accessToken) {
             }
         });
         
+        console.log(`✅ Info do usuário obtida: ${response.data.name || 'Nome não disponível'}`);
         return response.data;
     } catch (error) {
-        console.log(`⚠️ Não foi possível obter info do usuário ${userId}`);
+        console.log(`⚠️ Não foi possível obter info do usuário ${userId}:`, error.message);
         return { name: 'Usuario Instagram' };
     }
 }
@@ -375,7 +405,12 @@ async function getUserInfo(userId, accessToken) {
 // Enviar para MultiOne
 async function sendToMultiOne(messageData) {
     try {
-        console.log('🚀 Enviando para MultiOne:', messageData);
+        console.log('🚀 Enviando para MultiOne:', {
+            sender: messageData.sender_name,
+            message: messageData.message,
+            platform: messageData.platform,
+            timestamp: messageData.timestamp
+        });
         
         const response = await axios.post(CONFIG.multioneApiUrl, messageData, {
             headers: {
@@ -385,11 +420,19 @@ async function sendToMultiOne(messageData) {
             timeout: 15000
         });
         
-        console.log('✅ Mensagem enviada para MultiOne:', response.data);
+        console.log('✅ Mensagem enviada para MultiOne com sucesso!');
+        console.log('📊 Resposta MultiOne status:', response.status);
+        console.log('📋 Resposta MultiOne data:', response.data);
+        
         return response.data;
         
     } catch (error) {
-        console.error('❌ Erro ao enviar para MultiOne:', error.response?.data || error.message);
+        console.error('❌ ERRO ao enviar para MultiOne:');
+        console.error('📍 URL:', CONFIG.multioneApiUrl);
+        console.error('🔑 Token:', CONFIG.multioneToken ? 'Configurado' : 'Faltando');
+        console.error('📊 Status:', error.response?.status);
+        console.error('📋 Dados:', error.response?.data);
+        console.error('⚠️ Message:', error.message);
         throw error;
     }
 }
@@ -407,7 +450,13 @@ app.get('/health', (req, res) => {
         connections: {
             connectedAccounts: connectedAccounts.size,
             activeWebhooks: webhookSubscriptions.size,
-            multioneConnection: CONFIG.multioneToken ? 'configured' : 'missing'
+            multioneConnection: CONFIG.multioneToken ? 'configured' : 'missing',
+            instagramToken: CONFIG.instagramPageToken ? 'configured' : 'missing'
+        },
+        config: {
+            baseUrl: CONFIG.baseUrl,
+            facebookAppId: CONFIG.facebookAppId,
+            multioneApiUrl: CONFIG.multioneApiUrl
         }
     });
 });
@@ -427,6 +476,10 @@ app.get('/api/system/status', (req, res) => {
             uptime: process.uptime(),
             memory: process.memoryUsage(),
             nodeVersion: process.version
+        },
+        tokens: {
+            instagram: CONFIG.instagramPageToken ? 'Configurado' : 'Faltando',
+            multione: CONFIG.multioneToken ? 'Configurado' : 'Faltando'
         }
     };
     
@@ -458,37 +511,56 @@ app.get('/api/logs', (req, res) => {
 // Testar conexão MultiOne
 app.post('/api/test/multione', async (req, res) => {
     try {
+        console.log('🧪 Iniciando teste manual MultiOne...');
+        
         const testMessage = {
-            number: 'test_user_oauth',
-            message: 'Teste de conexão OAuth System → MultiOne',
-            sender_id: 'oauth_test',
-            sender_name: 'OAuth Test System',
+            number: 'test_user_oauth_final',
+            message: 'TESTE FINAL - OAuth System → MultiOne - Token Atualizado',
+            sender_id: 'oauth_test_final',
+            sender_name: 'OAuth Test System Final',
             platform: 'instagram',
             timestamp: new Date().toISOString(),
             type: 'inbound',
-            test: true
+            test: true,
+            metadata: {
+                test_type: 'manual_multione_test',
+                token_configured: CONFIG.instagramPageToken ? true : false
+            }
         };
         
         const result = await sendToMultiOne(testMessage);
-        res.json({ success: true, result });
+        
+        console.log('✅ Teste manual MultiOne concluído com sucesso');
+        res.json({ 
+            success: true, 
+            result,
+            message: 'Teste manual enviado para MultiOne com sucesso!'
+        });
         
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('❌ Teste manual MultiOne falhou:', error.message);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message,
+            details: error.response?.data 
+        });
     }
 });
 
 // Simular mensagem Instagram (para testes)
 app.post('/api/test/instagram-message', async (req, res) => {
-    const { message, userId = 'test_user', pageId } = req.body;
+    const { message, userId = 'test_user_final', pageId } = req.body;
     
     if (!message) {
         return res.status(400).json({ error: 'Message required' });
     }
     
     try {
+        console.log('🧪 Simulando mensagem Instagram...');
+        
         const mockMessaging = {
             sender: { id: userId },
-            recipient: { id: pageId || 'test_page' },
+            recipient: { id: pageId || '752860274568592' },
             timestamp: Date.now(),
             message: {
                 mid: `test_mid_${Date.now()}`,
@@ -497,21 +569,26 @@ app.post('/api/test/instagram-message', async (req, res) => {
         };
         
         const mockSubscription = {
-            pageId: pageId || 'test_page',
-            userId: 'test_user',
-            accessToken: 'test_token',
+            pageId: pageId || '752860274568592',
+            userId: 'test_user_final',
+            accessToken: CONFIG.instagramPageToken,
             active: true
         };
         
         await processInstagramMessage(mockMessaging, mockSubscription);
         
+        console.log('✅ Simulação de mensagem Instagram concluída');
         res.json({ 
             success: true, 
-            message: 'Mensagem de teste processada' 
+            message: 'Mensagem de teste processada e enviada para MultiOne!'
         });
         
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('❌ Simulação falhou:', error.message);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
     }
 });
 
@@ -533,7 +610,15 @@ app.listen(PORT, () => {
     console.log('🎉 ================================');
     console.log(`📋 Config: App ID ${CONFIG.facebookAppId}`);
     console.log(`🔑 MultiOne: ${CONFIG.multioneToken ? 'Configurado' : 'Faltando'}`);
+    console.log(`📸 Instagram Token: ${CONFIG.instagramPageToken ? 'Configurado' : 'Faltando'}`);
     console.log('🎉 ================================');
+    
+    // Log de inicialização do token
+    if (CONFIG.instagramPageToken) {
+        console.log('✅ Token Instagram configurado - Sistema pronto para testers!');
+    } else {
+        console.log('⚠️ Token Instagram não configurado - Configure FACEBOOK_PAGE_ACCESS_TOKEN');
+    }
 });
 
 // Tratamento de erros não capturados
