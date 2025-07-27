@@ -16,8 +16,8 @@ const CONFIG = {
     multioneToken: process.env.MULTIONE_TOKEN || '68eff5505a3989e99dadbc7243c9411efba9a80ef1f59e4680c89678bf63f515',
     multioneApiUrl: process.env.MULTIONE_API_URL || 'https://sock.multi360.digital/api/messages/send',
     baseUrl: process.env.BASE_URL || 'https://instagram-oauth-multione-production.up.railway.app',
-    // Token atual do Instagram para polling
-    instagramPageToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || 'EAAPHxlZBqFZAQBPCFdfImaq1hf368RTQ6AuaMbgrqzloZBfaYlcoKs6WXZA4s6jHpC9hPL8q3uJj1IyIKjqA117ZAgmNRfGl3O6ndJRwhMEBGlFtUZARNFZAZCnqm1TiOO2HQx0xSInS9VTlNWrkWjkRDoSww7lpAoLvbojMgeLTwveLADYcIRmOcpKuH4zs2HOrAJi6vJBb9xVs3F5ZA2Ii2QyCbsDHdzuQh44DNsAx97VViqZBkNr9uC',
+    // Token da página específica "Teste instagram"
+    instagramPageToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || 'EAAPHxlZBqFZAQBPMl9CloAIEm0gxKilWMWxbh01ZBkZC9zLvzADAtZBO9LsibIZCbqmYErMyuQFs2Mg2KxbZAtm1tqnjXEVCPZCPiZBGPQL6pa7Yn266bJMxo2FZCUGSxXXcGEsFeZBjEEKDheBiL5pymiLtNLmKneh7MZBJ9YCSPzkmjc3dFMs3dKWqeepYaWeTJb1PSYUt9v5Xks0ypB8CYAzKUDMOUD2ave0g1afp0StPpPIMd9PKJaqjfz2NArwZD',
     // Configurações do Polling
     pollingEnabled: process.env.POLLING_ENABLED !== 'false', // true por padrão
     pollingInterval: parseInt(process.env.POLLING_INTERVAL) || 120000, // 2 minutos
