@@ -51,12 +51,27 @@ function startPolling() {
 
     console.log('🔄 Iniciando sistema de polling Instagram...');
     console.log(`⏰ Intervalo: ${CONFIG.pollingInterval / 1000}s`);
+    console.log(`📊 Instagram Account ID: ${CONFIG.instagramBusinessAccountId}`);
 
-    // Polling inicial
-    pollInstagramMessages();
+    // Parar polling anterior se existir
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+
+    // Reset do último check para agora
+    lastPollingCheck = new Date();
+    console.log(`🕐 Último check resetado para: ${lastPollingCheck.toISOString()}`);
+
+    // Polling inicial após 10 segundos
+    setTimeout(() => {
+        console.log('🚀 Executando primeiro polling...');
+        pollInstagramMessages();
+    }, 10000);
 
     // Configurar intervalo
     pollingInterval = setInterval(() => {
+        console.log('⏰ Executando polling periódico...');
         pollInstagramMessages();
     }, CONFIG.pollingInterval);
 
@@ -75,13 +90,19 @@ function stopPolling() {
 // Função principal de polling
 async function pollInstagramMessages() {
     try {
-        console.log('🔍 [POLLING] Verificando novas mensagens Instagram...');
+        const now = new Date();
+        console.log(`🔍 [POLLING] Verificando novas mensagens Instagram... ${now.toISOString()}`);
+        console.log(`📊 [POLLING] Token: ${CONFIG.instagramPageToken ? 'Configurado' : 'Faltando'}`);
+        console.log(`🆔 [POLLING] Account ID: ${CONFIG.instagramBusinessAccountId}`);
         
         // 1. Buscar conversas da conta business
         const conversations = await getInstagramConversations();
         
         if (!conversations || conversations.length === 0) {
             console.log('📭 [POLLING] Nenhuma conversa encontrada');
+            console.log('💡 [POLLING] Possíveis causas: ID incorreto, token sem permissões, ou sem mensagens');
+            // Atualizar timestamp mesmo sem conversas
+            lastPollingCheck = now;
             return;
         }
 
@@ -109,7 +130,8 @@ async function pollInstagramMessages() {
         }
 
         // 4. Atualizar timestamp da última verificação
-        lastPollingCheck = new Date();
+        lastPollingCheck = now;
+        console.log(`🕐 [POLLING] Último check atualizado para: ${lastPollingCheck.toISOString()}`);
 
         if (newMessagesCount > 0) {
             console.log(`✅ [POLLING] ${newMessagesCount} mensagens processadas e enviadas para MultiOne`);
@@ -119,6 +141,9 @@ async function pollInstagramMessages() {
 
     } catch (error) {
         console.error('❌ [POLLING] Erro no sistema de polling:', error.message);
+        console.error('📋 [POLLING] Detalhes do erro:', error);
+        // Atualizar timestamp mesmo com erro
+        lastPollingCheck = new Date();
     }
 }
 
@@ -775,12 +800,12 @@ app.listen(PORT, () => {
     console.log(`🔄 Polling: ${CONFIG.pollingEnabled ? 'Habilitado' : 'Desabilitado'} (${CONFIG.pollingInterval/1000}s)`);
     console.log('🎉 =======================================');
     
-    // Inicializar sistema de polling após 5 segundos
+    // Inicializar sistema de polling após 3 segundos
     if (CONFIG.pollingEnabled && CONFIG.instagramPageToken) {
-        console.log('🔄 Iniciando sistema de polling em 5 segundos...');
+        console.log('🔄 Iniciando sistema de polling em 3 segundos...');
         setTimeout(() => {
             startPolling();
-        }, 5000);
+        }, 3000);
     } else {
         console.log('⚠️ Polling não iniciado:');
         if (!CONFIG.pollingEnabled) console.log('   - Polling desabilitado');
