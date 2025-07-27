@@ -472,13 +472,37 @@ app.get('/webhook/instagram', (req, res) => {
 
 // Receber mensagens do webhook (POST)
 app.post('/webhook/instagram', express.raw({type: 'application/json'}), async (req, res) => {
-    const body = JSON.parse(req.body.toString());
-    console.log('📸 [WEBHOOK] Instagram webhook recebido:', JSON.stringify(body, null, 2));
-    
     try {
+        // Verificar se há body
+        if (!req.body || req.body.length === 0) {
+            console.log('⚠️ [WEBHOOK] Body vazio recebido');
+            return res.status(200).send('OK');
+        }
+
+        // Tentar fazer parse do JSON
+        let body;
+        try {
+            const bodyString = req.body.toString();
+            if (!bodyString || bodyString.trim() === '') {
+                console.log('⚠️ [WEBHOOK] Body string vazio');
+                return res.status(200).send('OK');
+            }
+            body = JSON.parse(bodyString);
+        } catch (parseError) {
+            console.error('❌ [WEBHOOK] Erro ao fazer parse do JSON:', parseError.message);
+            console.error('📋 [WEBHOOK] Body recebido:', req.body.toString());
+            return res.status(400).send('INVALID_JSON');
+        }
+
+        console.log('📸 [WEBHOOK] Instagram webhook recebido:', JSON.stringify(body, null, 2));
+        
         // Processar cada entrada
-        for (const entry of body.entry || []) {
-            await processWebhookEntry(entry);
+        if (body.entry && Array.isArray(body.entry)) {
+            for (const entry of body.entry) {
+                await processWebhookEntry(entry);
+            }
+        } else {
+            console.log('⚠️ [WEBHOOK] Nenhuma entrada encontrada no webhook');
         }
         
         res.status(200).send('EVENT_RECEIVED');
