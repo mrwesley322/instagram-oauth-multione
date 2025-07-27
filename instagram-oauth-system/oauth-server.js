@@ -154,39 +154,85 @@ async function getInstagramConversations() {
         console.log(`📊 [POLLING] Instagram Business ID: ${CONFIG.instagramBusinessAccountId}`);
         console.log(`📄 [POLLING] Página ID: 752860274568592`);
         
-        // Tentar primeiro com Instagram Business Account
+        // Tentar diferentes métodos
         let response;
+        
+        // Método 1: Conversas da página (Facebook Messenger/Instagram unificado)
         try {
-            response = await axios.get(
-                `https://graph.facebook.com/v18.0/${CONFIG.instagramBusinessAccountId}/conversations`,
-                {
-                    params: {
-                        access_token: CONFIG.instagramPageToken,
-                        fields: 'id,updated_time,participants'
-                    }
-                }
-            );
-            console.log(`✅ [POLLING] Sucesso com Instagram Business Account`);
-        } catch (error) {
-            console.log(`⚠️ [POLLING] Falha com Instagram Business, tentando com página...`);
-            console.log(`❌ [POLLING] Erro: ${error.response?.data?.error?.message || error.message}`);
-            
-            // Tentar com ID da página
+            console.log(`🔄 [POLLING] Tentando API de conversas da página...`);
             response = await axios.get(
                 `https://graph.facebook.com/v18.0/752860274568592/conversations`,
                 {
                     params: {
                         access_token: CONFIG.instagramPageToken,
-                        fields: 'id,updated_time,participants'
+                        fields: 'id,updated_time,participants,message_count',
+                        platform: 'instagram', // Filtrar apenas Instagram
+                        limit: 25
                     }
                 }
             );
-            console.log(`✅ [POLLING] Sucesso com ID da página`);
+            console.log(`✅ [POLLING] Sucesso com conversas da página`);
+        } catch (error) {
+            console.log(`❌ [POLLING] Erro conversas da página: ${error.response?.data?.error?.message || error.message}`);
+            
+            // Método 2: Tentar sem filtro de plataforma
+            try {
+                console.log(`🔄 [POLLING] Tentando sem filtro de plataforma...`);
+                response = await axios.get(
+                    `https://graph.facebook.com/v18.0/752860274568592/conversations`,
+                    {
+                        params: {
+                            access_token: CONFIG.instagramPageToken,
+                            fields: 'id,updated_time,participants',
+                            limit: 25
+                        }
+                    }
+                );
+                console.log(`✅ [POLLING] Sucesso sem filtro de plataforma`);
+            } catch (error2) {
+                console.log(`❌ [POLLING] Erro sem filtro: ${error2.response?.data?.error?.message || error2.message}`);
+                
+                // Método 3: Usar endpoint diferente
+                try {
+                    console.log(`🔄 [POLLING] Tentando endpoint de mensagens da página...`);
+                    response = await axios.get(
+                        `https://graph.facebook.com/v18.0/752860274568592/messages`,
+                        {
+                            params: {
+                                access_token: CONFIG.instagramPageToken,
+                                fields: 'id,created_time,from,to,message',
+                                limit: 25
+                            }
+                        }
+                    );
+                    console.log(`✅ [POLLING] Sucesso com mensagens da página`);
+                    
+                    // Converter mensagens em formato de conversas
+                    const messages = response.data.data || [];
+                    const conversations = new Map();
+                    
+                    messages.forEach(msg => {
+                        const conversationId = `conversation_${msg.from?.id || 'unknown'}`;
+                        if (!conversations.has(conversationId)) {
+                            conversations.set(conversationId, {
+                                id: conversationId,
+                                updated_time: msg.created_time,
+                                participants: { data: [{ id: msg.from?.id }] }
+                            });
+                        }
+                    });
+                    
+                    return Array.from(conversations.values());
+                } catch (error3) {
+                    console.log(`❌ [POLLING] Erro mensagens da página: ${error3.response?.data?.error?.message || error3.message}`);
+                    throw error3;
+                }
+            }
         }
 
         return response.data.data || [];
     } catch (error) {
-        console.error('❌ [POLLING] Erro ao buscar conversas:', error.response?.data || error.message);
+        console.error('❌ [POLLING] Todos os métodos falharam:', error.response?.data || error.message);
         return [];
     }
 }
