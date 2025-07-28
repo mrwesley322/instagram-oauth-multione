@@ -18,8 +18,10 @@ const CONFIG = {
     multioneToken: process.env.MULTIONE_TOKEN || '68eff5505a3989e99dadbc7243c9411efba9a80ef1f59e4680c89678bf63f515',
     multioneApiUrl: process.env.MULTIONE_API_URL || 'https://sock.multi360.digital/api/messages/send',
     baseUrl: process.env.BASE_URL || 'https://instagram-oauth-multione-production.up.railway.app',
-    // Token da página específica "Teste instagram" - ATUALIZADO
-    instagramPageToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || 'EAAPHxlZBqFZAQBPImNtaCXLpMhd7GSO6v6qZCpJfj0ZBeZAFSdyLIplxRk48knmjYiZB0AuLe7CFWmvu8NefICPZB3TZCxuizQZCqZAIjI9Xaiv5bltDGFkexVSEZBBw49cXA3cTsfCywiHoq9fAXvHzzYe2hdJLeljCXLfkk4MZArpJ0RZBTUyFT4Kxs9Gofpd0855jXiCSf66FyOxilNNTHdWxEs0hGmM4ZCKUvNZCCrFfcfAGzZA2vodq4knWkgZDZD',
+    // Token da página unificado (Instagram + Messenger) - ATUALIZADO
+    pageAccessToken: process.env.PAGE_ACCESS_TOKEN || 'EAAPHxlZBqFZAQBPCmVZCMSpjMGwK9JrBgP13LGiCkdgPDltCtToQAuPhZAabwpLDHT8uaZBZBRMoMwxrUZCQddXU5WV0lEsWHfarQ8d67gNQ29snLZAJc3nXk0xZCSedzugPaZA7uHtXGPaQJZAw3BBM8gt0eAoDDFNELP0aR4wlbt6ZBZBX3PLGW5sWuo1eSZAibtSo39DaGA8lcJZBwZDZD',
+    // Alias para compatibilidade
+    instagramPageToken: process.env.FACEBOOK_PAGE_ACCESS_TOKEN || process.env.PAGE_ACCESS_TOKEN || 'EAAPHxlZBqFZAQBPCmVZCMSpjMGwK9JrBgP13LGiCkdgPDltCtToQAuPhZAabwpLDHT8uaZBZBRMoMwxrUZCQddXU5WV0lEsWHfarQ8d67gNQ29snLZAJc3nXk0xZCSedzugPaZA7uHtXGPaQJZAw3BBM8gt0eAoDDFNELP0aR4wlbt6ZBZBX3PLGW5sWuo1eSZAibtSo39DaGA8lcJZBwZDZD',
     // Configurações do Polling
     pollingEnabled: process.env.POLLING_ENABLED !== 'false', // true por padrão
     pollingInterval: parseInt(process.env.POLLING_INTERVAL) || 120000, // 2 minutos
@@ -115,7 +117,7 @@ async function processUnifiedWebhookEntry(entry) {
         const subscription = {
             pageId: pageId,
             userId: 'webhook_user',
-            accessToken: CONFIG.instagramPageToken,
+            accessToken: CONFIG.pageAccessToken,
             subscribedAt: new Date().toISOString(),
             active: true
         };
@@ -283,8 +285,8 @@ function startPolling() {
         return;
     }
 
-    if (!CONFIG.instagramPageToken) {
-        console.log('⚠️ Token Instagram não configurado - polling não iniciado');
+    if (!CONFIG.pageAccessToken) {
+        console.log('⚠️ Token da página não configurado - polling não iniciado');
         return;
     }
 
@@ -331,7 +333,7 @@ async function pollInstagramMessages() {
     try {
         const now = new Date();
         console.log(`🔍 [POLLING] Verificando novas mensagens Instagram... ${now.toISOString()}`);
-        console.log(`📊 [POLLING] Token: ${CONFIG.instagramPageToken ? 'Configurado' : 'Faltando'}`);
+        console.log(`📊 [POLLING] Token: ${CONFIG.pageAccessToken ? 'Configurado' : 'Faltando'}`);
         console.log(`🆔 [POLLING] Account ID: ${CONFIG.instagramBusinessAccountId}`);
         
         // 1. Buscar conversas da conta business
@@ -403,7 +405,7 @@ async function getInstagramConversations() {
                 `https://graph.facebook.com/v18.0/752860274568592/conversations`,
                 {
                     params: {
-                        access_token: CONFIG.instagramPageToken,
+                        access_token: CONFIG.pageAccessToken,
                         fields: 'id,updated_time,participants,message_count',
                         platform: 'instagram', // Filtrar apenas Instagram
                         limit: 25
@@ -421,7 +423,7 @@ async function getInstagramConversations() {
                     `https://graph.facebook.com/v18.0/752860274568592/conversations`,
                     {
                         params: {
-                            access_token: CONFIG.instagramPageToken,
+                            access_token: CONFIG.pageAccessToken,
                             fields: 'id,updated_time,participants',
                             limit: 25
                         }
@@ -438,7 +440,7 @@ async function getInstagramConversations() {
                         `https://graph.facebook.com/v18.0/752860274568592/messages`,
                         {
                             params: {
-                                access_token: CONFIG.instagramPageToken,
+                                access_token: CONFIG.pageAccessToken,
                                 fields: 'id,created_time,from,to,message',
                                 limit: 25
                             }
@@ -486,7 +488,7 @@ async function getNewMessagesFromConversation(conversationId) {
             `https://graph.facebook.com/v18.0/${conversationId}/messages`,
             {
                 params: {
-                    access_token: CONFIG.instagramPageToken,
+                    access_token: CONFIG.pageAccessToken,
                     fields: 'id,created_time,from,to,message',
                     since: since,
                     limit: 50
@@ -530,7 +532,7 @@ async function processPolledMessage(message, conversation) {
         console.log(`💬 [POLLING] Processando mensagem: "${message.message.text}"`);
 
         // Obter informações do remetente
-        const senderInfo = await getUserInfo(message.from.id, CONFIG.instagramPageToken);
+        const senderInfo = await getUserInfo(message.from.id, CONFIG.pageAccessToken);
 
         // Preparar dados para MultiOne (mesmo formato do webhook)
         const messageData = {
@@ -548,7 +550,7 @@ async function processPolledMessage(message, conversation) {
                 polling_method: true,
                 received_at: new Date().toISOString(),
                 from_polling: true,
-                token_used: CONFIG.instagramPageToken.substring(0, 20) + '...'
+                token_used: CONFIG.pageAccessToken.substring(0, 20) + '...'
             }
         };
 
